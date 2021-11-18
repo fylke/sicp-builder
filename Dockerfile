@@ -53,5 +53,4 @@ ENV PATH \
 "/sicp/phantomjs-2.1.1-linux-x86_64/bin:\
 ${PATH}"
 
-CMD ["sleep", "1000"]
 #RUN ["make", "all"]
