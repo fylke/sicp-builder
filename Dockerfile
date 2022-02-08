@@ -10,12 +10,16 @@ RUN apk add --no-cache wget
 RUN apk add --no-cache tar
 RUN apk add --no-cache fontconfig
 RUN apk add --no-cache inkscape
+RUN apk add --no-cache zip
+
 
 RUN gem install nokogiri
 
 RUN git clone https://github.com/sarabander/sicp.git
-
+COPY inkscape.patch /sicp/inkscape.patch
 WORKDIR /sicp
+RUN git apply inkscape.patch
+
 RUN wget http://www.cpan.org/src/5.0/perl-5.12.2.tar.gz
 RUN tar -xvf perl-5.12.2.tar.gz
 WORKDIR /sicp/perl-5.12.2
@@ -27,7 +31,7 @@ RUN ["./Configure", "-Dcc=gcc", "-e", "-d",\
 RUN ["make"]
 RUN ["make", "install"]
 RUN ["ln", "-s", "/opt/perl-5.12.2-emg/bin/perl", "/usr/bin/perl"]
-RUN ["ln", "-s", "/ust/local/bin/ruby", "/usr/bin/ruby"]
+RUN ["ln", "-s", "/usr/local/bin/ruby", "/usr/bin/ruby"]
 
 WORKDIR /sicp
 RUN wget https://ftp.gnu.org/gnu/texinfo/texinfo-5.1.tar.gz
@@ -53,4 +57,5 @@ ENV PATH \
 "/sicp/phantomjs-2.1.1-linux-x86_64/bin:\
 ${PATH}"
 
+CMD ["sleep", "infinity"]
 #RUN ["make", "all"]

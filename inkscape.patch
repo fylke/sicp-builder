@@ -1,0 +1,13 @@
+diff --git a/Makefile b/Makefile
+index 7a4ed74..c65d506 100644
+--- a/Makefile
++++ b/Makefile
+@@ -87,7 +87,7 @@ $(META): $(NEXUS) create_metafiles.rb
+ 	./create_metafiles.rb
+ 
+ $(THUMB): $(COVER)
+-	@inkscape -b "#fbfbfb" -C -e $(THUMB) -f $(DIR)fig/coverpage.std.svg > /dev/null
++	@inkscape -b "#fbfbfb" -C -o $(THUMB) $(DIR)fig/coverpage.std.svg > /dev/null
+ 
+ $(GOAL): $(META) $(THUMB) $(FIG) $(CSS) $(FONT) mimetype META-INF/* LICENSE
+ 	@if [ -f $(GOAL) ]; then rm $(GOAL); fi; \
