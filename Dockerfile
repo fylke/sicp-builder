@@ -9,6 +9,7 @@ RUN apk add --no-cache bash
 RUN apk add --no-cache wget
 RUN apk add --no-cache tar
 RUN apk add --no-cache fontconfig
+RUN apk add --no-cache msttcorefonts-installer
 RUN apk add --no-cache inkscape
 RUN apk add --no-cache zip
 
