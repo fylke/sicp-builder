@@ -2,16 +2,18 @@ FROM ruby:3.0-alpine
 
 RUN apk update
 RUN apk add --no-cache gcc
-RUN apk add --no-cache git
 RUN apk add --no-cache libc-dev
+RUN apk add --no-cache gcompat
 RUN apk add --no-cache make
 RUN apk add --no-cache bash
 RUN apk add --no-cache wget
 RUN apk add --no-cache tar
+RUN apk add --no-cache git
 RUN apk add --no-cache fontconfig
 RUN apk add --no-cache msttcorefonts-installer
 RUN apk add --no-cache inkscape
 RUN apk add --no-cache zip
+RUN apk add --no-cache grep
 
 
 RUN gem install nokogiri
@@ -45,7 +47,7 @@ RUN ["make", "install"]
 WORKDIR /sicp
 RUN wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2
 RUN tar -xvf phantomjs-2.1.1-linux-x86_64.tar.bz2
-#RUN ["cp", "phantomjs-2.1.1-linux-x86_64/bin/phantomjs", "."]
+RUN update-ms-fonts
 
 WORKDIR /sicp
 ENV PERL5LIB \
