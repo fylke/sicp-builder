@@ -1,4 +1,4 @@
-FROM docker.io/library/ruby:3.4-alpine
+FROM docker.io/library/ruby:3.4-alpine AS build
 
 ARG SICP_REF=bda03f79d6e2e8899ac2b5ca6a3732210e290a79
 
@@ -55,4 +55,22 @@ RUN make -B all \
     && ! grep -lE "color:blue|class='faulty'" html/*.xhtml \
     && test -s /sicp.epub
 
-CMD ["sleep", "infinity"]
+FROM docker.io/library/eclipse-temurin:21-jre-alpine AS validate
+
+ARG EPUBCHECK_VERSION=5.4.0
+ARG EPUBCHECK_SHA256=33350c61038e71dfb3d45a76aed04bf5481e6d5500cb780f6e98db8bbd15a28c
+
+RUN apk add --no-cache unzip wget \
+    && wget -q -O /tmp/epubcheck.zip \
+       "https://github.com/w3c/epubcheck/releases/download/v${EPUBCHECK_VERSION}/epubcheck-${EPUBCHECK_VERSION}.zip" \
+    && echo "${EPUBCHECK_SHA256}  /tmp/epubcheck.zip" | sha256sum -c - \
+    && unzip -q /tmp/epubcheck.zip -d /opt \
+    && rm /tmp/epubcheck.zip
+
+COPY --from=build /sicp.epub /sicp.epub
+# Exits non-zero on any error or warning, which fails the build.
+RUN java -jar /opt/epubcheck-${EPUBCHECK_VERSION}/epubcheck.jar --failonwarnings /sicp.epub
+
+FROM scratch AS epub
+# Copying from the validate stage makes validation a prerequisite of the output.
+COPY --from=validate /sicp.epub /sicp.epub
