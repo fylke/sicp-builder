@@ -1,0 +1,1013 @@
+--- a/tp/Texinfo/Convert/HTML.pm
++++ b/tp/Texinfo/Convert/HTML.pm
+@@ -17,10 +17,17 @@
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ # 
+ # Original author: Patrice Dumas <pertusus@free.fr>
++#
++# Modified in 2013 and 2014 by Andres Raba in places marked by "A.R" and
++# elsewhere. Run 'diff HTML.pl HTML.orig.pm' to see detailed differences.
++
+ 
+ package Texinfo::Convert::HTML;
+ 
+-use 5.00405;
++#use 5.00405;     # (A.R) -->
++use 5.012;
++use warnings;
++use autodie;      # --> (A.R)
+ use strict;
+ 
+ use Texinfo::Convert::Converter;
+@@ -56,6 +63,24 @@
+ 
+ $VERSION = '6.0';
+ 
++# I/O commands                            # (A.R) -->
++
++# Return contents of file as string
++sub swallow {
++  my $filename = shift;
++  local $/;
++  open my $fh, "<", $filename;
++  return <$fh>;
++}
++
++# Write contents of string to file
++sub pour {
++  my ($string, $filename) = @_;
++  open my $fh, ">", $filename;
++  print $fh $string;
++  close $fh;
++}                                         # --> (A.R)
++
+ # misc commands that are of use for formatting.
+ my %formatting_misc_commands = %Texinfo::Convert::Text::formatting_misc_commands;
+ my %no_brace_commands = %Texinfo::Common::no_brace_commands;
+@@ -651,9 +676,9 @@
+  'Back',        'prev',
+  'FastBack',    '',
+  'Prev',        'prev',
+- 'Up',          'up',
++ 'Up',          'prev',
+  'Next',        'next',
+- 'NodeUp',      'up',
++ 'NodeUp',      'prev',
+  'NodeNext',    'next',
+  'NodePrev',    'prev',
+  'NodeForward', '',
+@@ -670,9 +695,9 @@
+ my %BUTTONS_ACCESSKEY =
+ (
+  'Top',         '',
+- 'Contents',    '',
++ 'Contents',    'c',
+  'Overview',    '',
+- 'Index',       '',
++ 'Index',       'i',
+  'This',        '',
+  'Back',        'p',
+  'FastBack',    '',
+@@ -695,10 +720,10 @@
+ 
+ my %BUTTONS_EXAMPLE =
+     (
+-     'Top',         ' &nbsp; ',
+-     'Contents',    ' &nbsp; ',
+-     'Overview',    ' &nbsp; ',
+-     'Index',       ' &nbsp; ',
++     'Top',         ' &#160; ',       # nbsp    (A.R) -->
++     'Contents',    ' &#160; ',
++     'Overview',    ' &#160; ',
++     'Index',       ' &#160; ',                 # --> (A.R)
+      'This',        '1.2.3',
+      'Back',        '1.2.2',
+      'FastBack',    '1',
+@@ -712,11 +737,11 @@
+      'NodeBack',    '1.2.2',
+      'Forward',     '1.2.4',
+      'FastForward', '2',
+-     'About',       ' &nbsp; ',
++     'About',       ' &#160; ',       # nbsp    (A.R)
+      'First',       '1.',
+      'Last',        '1.2.4',
+-     'NextFile',    ' &nbsp; ',
+-     'PrevFile',    ' &nbsp; ',
++     'NextFile',    ' &#160; ',       # (A.R)
++     'PrevFile',    ' &#160; ',       # (A.R)
+     );
+ 
+ 
+@@ -733,7 +758,7 @@
+      'Contents',    $self->gdt('Contents'),
+      'Overview',    $self->gdt('Overview'),
+      'Index',       $self->gdt('Index'),
+-     ' ',           ' &nbsp; ',
++     ' ',           ' &#160; ',                 # nbsp    (A.R)
+      'This',        $self->gdt('current'),
+      'Back',        ' &lt; ',
+      'FastBack',    ' &lt;&lt; ',
+@@ -745,7 +770,7 @@
+      #'NodeNext',    $self->gdt('Next node'),
+      'NodeNext',    $self->gdt('Next'),
+      #'NodePrev',    $self->gdt('Previous node'),
+-     'NodePrev',    $self->gdt('Previous'),
++     'NodePrev',    $self->gdt('Prev'),
+      'NodeForward', $self->gdt('Forward node'),
+      'NodeBack',    $self->gdt('Back node'),
+      'Forward',     ' &gt; ',
+@@ -913,7 +938,7 @@
+ 
+ 
+ my %defaults = (
+-  'ENABLE_ENCODING'      => 0,
++  'ENABLE_ENCODING'      => 1,                # (A.R)
+   'SHOW_MENU'            => 1,
+   'OUTPUT_ENCODING_NAME'  => 'utf-8',
+   #'encoding_name'        => undef,
+@@ -922,25 +947,26 @@
+   'SUBDIR'               => undef,
+   'USE_NODES'            => 1,
+   'INLINE_CONTENTS'      => 1,
+-  'SPLIT'                => 'node',
++  'SPLIT'                => 'section',
+ # if set style is added in attribute.
+   'INLINE_CSS_STYLE'     => 0,
+ # if set, no css is used.
+   'NO_CSS'               => 0,
+ # if set, use node anchors for sections targets
+   'USE_NODE_TARGET'      => 1,
+-  'OPEN_QUOTE_SYMBOL'    => '&lsquo;',
+-  'CLOSE_QUOTE_SYMBOL'   => '&rsquo;',
++  'OPEN_QUOTE_SYMBOL'    => '&#8216;',        # lsquo     (A.R)
++  'CLOSE_QUOTE_SYMBOL'   => '&#8217;',        # rsquo     (A.R)
+   'USE_ISO'              => 1,
+ # file name used for Top node when NODE_FILENAMES is true
+   'TOP_NODE_FILE'        => 'index',
+-  'NODE_FILE_EXTENSION'  => 'html',
+-  'EXTENSION'            => 'html',
++  'TOP_NODE_UP_URL'      => '../index.xhtml', # (A.R)
++  'NODE_FILE_EXTENSION'  => 'xhtml',
++  'EXTENSION'            => 'xhtml',
+   'TOP_NODE_FILE_TARGET' => 'index',
+   'TRANSLITERATE_FILE_NAMES' => 1,
+   'USE_LINKS'            => 1,
+   'USE_NUMERIC_ENTITY'   => 1,
+-  'ENABLE_ENCODING_USE_ENTITY'   => 1,
++  'ENABLE_ENCODING_USE_ENTITY'   => 0,        # (A.R)
+   'DATE_IN_HEADER'       => 0,
+   'AVOID_MENU_REDUNDANCY' => 0,
+   'HEADERS'              => 1,
+@@ -953,11 +979,11 @@
+   'XREF_USE_FLOAT_LABEL'   => 0,
+   'OVERVIEW_LINK_TO_TOC' => 1,
+   'COMPLEX_FORMAT_IN_TABLE' => 0,
+-  'WORDS_IN_PAGE'        => 300,
++  'WORDS_IN_PAGE'        => 100,        # (A.R)
+   'SECTION_BUTTONS'      => [[ 'NodeNext', \&_default_node_direction ],
+                              [ 'NodePrev', \&_default_node_direction ],
+                              [ 'NodeUp', \&_default_node_direction ], ' ',
+-                             'Contents', 'Index'],
++                             'Contents'],
+   'LINKS_BUTTONS'        => ['Top', 'Index', 'Contents', 'About', 
+                               'NodeUp', 'NextFile', 'PrevFile'],
+ #  'TOP_BUTTONS'          => ['Back', 'Forward', ' ',
+@@ -987,21 +1013,28 @@
+                               'Toc_Frame' => '_toc_frame',
+                               },
+   'misc_elements_order'  => ['Footnotes', 'Contents', 'Overview', 'About'],
+-  'DOCTYPE'              => '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">',
+-  'FRAMESET_DOCTYPE'     => '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">',
+-  'DEFAULT_RULE'         => '<hr>',
+-  'BIG_RULE'             => '<hr>',
+-  'MENU_SYMBOL'          => '&bull;',
++  'DOCTYPE'              => '<!DOCTYPE html>',    # (A.R) -->
++  'FRAMESET_DOCTYPE'     => '<!DOCTYPE html>',
++  'EXTRA_HEAD'           => '<link href="css/style.css" rel="stylesheet" type="text/css" />
++<link href="css/prettify.css" rel="stylesheet" type="text/css" />
++
++<script class="prettifier" src="js/highlight/prettify.js" type="text/javascript"></script>
++<script class="prettifier" src="js/highlight/lang-lisp.js" type="text/javascript"></script>',
++  'AFTER_BODY_OPEN'      => '<section><span class="top jump" title="Jump to top"><a href="#pagetop" accesskey="t">&#8673;</a></span><a id="pagetop"></a>',
++  'PRE_BODY_CLOSE'       => '</section><span class="bottom jump" title="Jump to bottom"><a href="#pagebottom" accesskey="b">&#8675;</a></span><a id="pagebottom"></a>',         # --> (A.R)
++  'DEFAULT_RULE'         => '',              # (A.R)
++  'BIG_RULE'             => '<hr/>',              # (A.R)
++  'MENU_SYMBOL'          => '&#8226;',            # bull    (A.R)
+   'MENU_ENTRY_COLON'     => ':',
+   'INDEX_ENTRY_COLON'    => ':',
+   'BODYTEXT'             => undef,
+   'documentlanguage'     => 'en',
+   'xrefautomaticsectiontitle' => 'off',
+   'SHOW_TITLE'           => 1,
+-  'USE_TITLEPAGE_FOR_TITLE' => 0,
++  'USE_TITLEPAGE_FOR_TITLE' => 1,                 # (A.R)
+   'MONOLITHIC'           => 1,
+   'CHAPTER_HEADER_LEVEL' => 2,
+-  'MAX_HEADER_LEVEL'     => 4,
++  'MAX_HEADER_LEVEL'     => 5,                    # (A.R)
+   'FOOTNOTE_END_HEADER_LEVEL' => 4,
+   'FOOTNOTE_SEPARATE_HEADER_LEVEL' => 4,
+   
+@@ -1050,10 +1083,10 @@
+      'pre.menu-comment'       => "$MENU_PRE_STYLE",
+      'pre.menu-preformatted'  => "$MENU_PRE_STYLE",
+      'a.summary-letter'       => 'text-decoration: none',
+-     'blockquote.smallquotation' => 'font-size: smaller',
++#     'blockquote.smallquotation' => 'font-size: smaller',       # (A.R)
+      'pre.display'            => 'font-family: inherit',
+-     'pre.smalldisplay'       => 'font-family: inherit; font-size: smaller',
+-     'pre.smallexample'       => 'font-size: smaller',
++#     'pre.smalldisplay'       => 'font-family: inherit; font-size: smaller',    # (A.R)
++#     'pre.smallexample'       => 'font-size: smaller',     # (A.R)
+      'span.sansserif'     => 'font-family: sans-serif; font-weight: normal',
+      'span.roman'         => 'font-family: serif; font-weight: normal',
+      'span.nocodebreak'   => 'white-space: nowrap',
+@@ -1062,8 +1095,8 @@
+ );
+ 
+ $css_map{'pre.format'} = $css_map{'pre.display'};
+-$css_map{'pre.smallformat'} = $css_map{'pre.smalldisplay'};
+-$css_map{'pre.smalllisp'} = $css_map{'pre.smallexample'};
++#$css_map{'pre.smallformat'} = $css_map{'pre.smalldisplay'};    # (A.R)
++#$css_map{'pre.smalllisp'} = $css_map{'pre.smallexample'};      # (A.R)
+ 
+ my %preformatted_commands_context = %preformatted_commands;
+ $preformatted_commands_context{'verbatim'} = 1;
+@@ -1080,8 +1113,8 @@
+   $indented_preformatted_commands{$indented_format} = 1;
+   $indented_preformatted_commands{"small$indented_format"} = 1;
+ 
+-  $css_map{"div.$indented_format"} = 'margin-left: 3.2em';
+-  $css_map{"div.small$indented_format"} = 'margin-left: 3.2em';
++  $css_map{"div.$indented_format"} = 'margin-left: 0em';
++  $css_map{"div.small$indented_format"} = 'margin-left: 0em';
+ }
+ 
+ $css_map{"blockquote.indentedblock"} = 'margin-right: 0em';
+@@ -1200,9 +1233,9 @@
+     $Texinfo::Convert::Converter::default_xml_commands_formatting{'normal'}->{$command};
+ }
+ 
+-$default_commands_formatting{'normal'}->{' '} = '&nbsp;';
+-$default_commands_formatting{'normal'}->{"\t"} = '&nbsp;';
+-$default_commands_formatting{'normal'}->{"\n"} = '&nbsp;';
++$default_commands_formatting{'normal'}->{' '} = '&#160;';       # nbsp    (A.R)
++$default_commands_formatting{'normal'}->{"\t"} = '&#160;';      # (A.R)
++$default_commands_formatting{'normal'}->{"\n"} = '&#160;';      # (A.R)
+ 
+ my %default_commands_translation;
+ # possible example of use, right now not used, as the generic
+@@ -1224,7 +1257,7 @@
+ $default_commands_formatting{'normal'}->{'enddots'} 
+     = '<small class="enddots">...</small>';
+ $default_commands_formatting{'preformatted'}->{'enddots'} = '...';
+-$default_commands_formatting{'normal'}->{'*'} = '<br>';
++$default_commands_formatting{'normal'}->{'*'} = '<br/>';              # (A.R)
+ $default_commands_formatting{'preformatted'}->{'*'} = "\n";
+ 
+ 
+@@ -1314,7 +1347,7 @@
+       't'           => 'tt',
+       'var'         => 'var',
+       'verb'        => 'tt',
+-      'math'        => 'em',
++#     'math'        => 'em',      # (A.R)
+ };
+ 
+ my %style_commands_formatting;
+@@ -1525,7 +1558,7 @@
+   my $id = $self->command_id($command);
+   if (defined($id) and $id ne '' and !@{$self->{'multiple_pass'}}
+       and !$self->in_string()) {
+-    return "<a name=\"$id\"></a>";
++    return "<a id=\"$id\"></a>";
+   }
+   return '';
+ }
+@@ -1605,9 +1638,10 @@
+     }
+   }
+ 
+-  $foot_lines .= '<h3>' .
+-   "<a name=\"$footid\" href=\"$document_filename#$docid\">($number_in_doc)</a></h3>\n"
+-   . $footnote_text;
++  $footnote_text =~ s/<p>//;                    # (A.R) -->
++  $foot_lines .= "<div id=\"$footid\"><p>" .
++   "<a class=\"footnote_backlink\" href=\"$document_filename#$docid\"><sup>$number_in_doc</sup></a>\n"
++   . $footnote_text . "</div>\n";               # --> (A.R)
+ 
+   my $footnote_number_text;
+   if ($self->in_preformatted()) {
+@@ -1615,7 +1649,7 @@
+   } else {
+     $footnote_number_text = "<sup>$number_in_doc</sup>";
+   }
+-  return "<a name=\"$docid\" href=\"$footnote_filename#$footid\">$footnote_number_text</a>";
++  return "<a class=\"footnote_link\" id=\"$docid\" href=\"$footnote_filename#$footid\">$footnote_number_text</a>";    # (A.R)
+ }
+ $default_commands_conversion{'footnote'} = \&_convert_footnote_command;
+ 
+@@ -1704,7 +1738,47 @@
+       if (!defined($alt_string) or ($alt_string eq '')) {
+         $alt_string = $self->protect_text($basefile);
+       }
+-      return "<img src=\"".$self->protect_text($image_file)."\" alt=\"$alt_string\">";
++
++      # Extract dimensions from svg file            # (A.R) -->
++
++      my ($svgfile, $svgstring, $svgwidth, $svgheight, $objectwidth, $objectheight);
++
++      # Attempt to open SVG file
++      $svgfile = $self->protect_text($image_file);
++      $svgstring = swallow($svgfile);
++
++#     The commented out lines were used only once to modify the svg files
++#     to make them scalable in step with the document font size. 
++#     This solution got inspiration from 
++#     http://soqr.fr/testsvg/embed-svg-liquid-layout-responsive-web-design.php
++#     via http://css-tricks.com/using-svg/#comment-297255
++
++#     $svgstring =~ 
++#       s/
++#         version="1.\d"(\s+)
++#         width="\s*(\d+(?:\.\d*)?)\s*"\s+
++#         height="\s*(\d+(?:\.\d*)?)\s*"
++#       /
++#         'version="1.1"' . $1 . 
++#         'preserveAspectRatio="xMinYMin meet"' . $1 . 
++#         'viewBox="0 0' . ' ' . ($svgwidth = sprintf("%.0f", $2) + 1) . ' ' . 
++#         ($svgheight = sprintf("%.0f", $3) + 1) . '"';
++#       /ex;
++
++#     pour($svgstring, $svgfile);
++#     $objectwidth = (sprintf("%.1f", ($svgwidth / 7.76)) . "%");
++
++      # These lines were added after the first run.
++      $svgstring =~ m/viewBox="0\s+0\s+([0-9.]+)\s+([0-9.]+)"/;   # extract the width and height of the svg image.
++
++      # For debugging:
++      unless ($1 && $2) { $svgstring =~ m/(?<fig>"Fig.+")/; print "ViewBox regex didn't match in $+{fig}.\n"; }
++
++      $objectwidth  = (sprintf("%.2f", ($1 * 67.0 / 776)) . "ex");  # 776px or 67ex is the column width at font size 170%.
++      $objectheight = (sprintf("%.2f", ($2 * 67.0 / 776)) . "ex");
++
++      return "\n" . "<object style=\"width: $objectwidth; height: $objectheight;\" data=\"" . $self->protect_text($image_file) . 
++        "\" type=\"image/svg+xml\">SVG</object>";  # --> (A.R)
+     }
+   }
+   return '';
+@@ -1712,17 +1786,19 @@
+ 
+ $default_commands_conversion{'image'} = \&_convert_image_command;
+ 
+-#sub _convert_math_command($$$$)
+-#{
+-#  my $self = shift;
+-#  my $cmdname = shift;
+-#  my $command = shift;
+-#  my $args = shift;
+-#
+-#  return $args->[0]->{'normal'};
+-#}
++# Enclose math in \( ... \) for MathJax (A.R) -->
++sub _convert_math_command($$$$)
++{
++  my $self = shift;
++  my $cmdname = shift;
++  my $command = shift;
++  my $args = shift;
+ 
+-#$default_commands_conversion{'math'} = \&_convert_math_command;
++  my $text = $args->[0]->{'normal'};
++  return '\\( ' . $text . ' \\)';
++}
++
++$default_commands_conversion{'math'} = \&_convert_math_command;  # --> (A.R)
+ 
+ sub _convert_accent_command($$$$)
+ {
+@@ -1896,17 +1972,27 @@
+   }
+ 
+   my $align = '';
+-  $align = ' align="center"' if ($cmdname eq 'centerchap' or $cmdname eq 'settitle');
++  $align = ' style="text-align: center"' if ($cmdname eq 'centerchap' or $cmdname eq 'settitle');
+   if ($level < 1) {
+     $level = 1;
+   } elsif ($level > $self->get_conf('MAX_HEADER_LEVEL')) {
+     $level = $self->get_conf('MAX_HEADER_LEVEL');
+   }
++  #(A.R) -->
++  # Enclose chapter or section number inside span to apply different style
++  my $ltype;
++  if ($level == 2) {
++    $ltype = "chap";
++  } else {
++    $ltype = "sec";
++  }
++  $text =~ s/^(\d(?:\.\d+)*)\s+(.+)$/<span class=\"${ltype}num\">$1<\/span><span class=\"${ltype}title\">$2<\/span>/;
++  # --> (A.R)
+   my $result = $self->_attribute_class("h$level", $class) ."$align>$text</h$level>";
+   # titlefont appears inline in text, so no end of line is
+   # added. The end of line should be added by the user if needed.
+   $result .= "\n" unless ($cmdname eq 'titlefont');
+-  $result .= $self->get_conf('DEFAULT_RULE') . "\n" 
++  $result .= $self->get_conf('DEFAULT_RULE') . "\n\n"     # (A.R)
+      if ($cmdname eq 'part' 
+          and defined($self->get_conf('DEFAULT_RULE')) 
+          and $self->get_conf('DEFAULT_RULE') ne '');
+@@ -1961,7 +2047,7 @@
+   } else {
+     $alt = $button;
+   }
+-  return qq{<img src="$icon" border="0" alt="$alt" align="middle">};
++  return qq{<img src="$icon" border="0" alt="$alt" style="text-align: center"/>};     # (A.R)
+ }
+ 
+ sub _direction_href_attributes($$)
+@@ -2131,15 +2217,15 @@
+   my $result = '';
+   if ($self->get_conf('HEADER_IN_TABLE')) {
+     $result .= $self->_attribute_class('table', 'header')
+-        .' cellpadding="1" cellspacing="1" border="0">'."\n";
++        .' style="padding: 1px; border-collapse: collapse; border-spacing: 1">'."\n";
+     $result .= "<tr>" unless $vertical;
+   } else {
+-    $result .= $self->_attribute_class('div', 'header').">\n<p>\n";
++    $result .= $self->_attribute_class('nav', 'header').">\n<p>\n"; # (A.R)
+   }
+   foreach my $button (@$buttons) {
+     if ($self->get_conf('HEADER_IN_TABLE')) {
+-      $result .= qq{<tr valign="top" align="left">\n} if $vertical;
+-      $result .=  qq{<td valign="middle" align="left">};
++      $result .= qq{<tr style="vertical-align: top; text-align: left">\n} if $vertical;
++      $result .=  qq{<td style="vertical-align: middle; text-align: left">};
+     }
+     my $direction;
+     if (ref($button) eq 'ARRAY' 
+@@ -2174,7 +2260,7 @@
+     $result .= "</tr>" unless $vertical;
+     $result .= "</table>\n";
+   } else {
+-     $result .= "</p>\n</div>\n";
++     $result .= "</p>\n</nav>\n";     # (A.R)
+   }
+   return $result;
+ }
+@@ -2188,9 +2274,9 @@
+ 
+   my $result = '';
+   if ($self->get_conf('VERTICAL_HEAD_NAVIGATION')) {
+-    $result .= '<table border="0" cellpadding="0" cellspacing="0">
+-<tr valign="top">
+-<td align="left">
++    $result .= '<table style="padding: 0; border-collapse: collapse; border-spacing: 0">
++<tr style="vertical-align: top">
++<td style="text-align: left">
+ ';
+   }
+   $result .= &{$self->{'format_navigation_header_panel'}}($self, $buttons,
+@@ -2198,10 +2284,10 @@
+                                    $self->get_conf('VERTICAL_HEAD_NAVIGATION'));
+   if ($self->get_conf('VERTICAL_HEAD_NAVIGATION')) {
+     $result .= '</td>
+-<td align="left">
++<td style="text-align: left">
+ ';
+   } elsif ($self->get_conf('SPLIT') eq 'node') {
+-    $result .= $self->get_conf('DEFAULT_RULE')."\n";
++    $result .= $self->get_conf('DEFAULT_RULE')."\n\n";      # (A.R)
+   }
+   return $result;
+ }
+@@ -2246,7 +2332,7 @@
+           $result .= &{$self->{'format_navigation_header'}}($self, 
+                 $self->get_conf('CHAPTER_BUTTONS'), $cmdname, $command);
+ 
+-          $result .= $self->get_conf('DEFAULT_RULE') ."\n"
++          $result .= $self->get_conf('DEFAULT_RULE') ."\n\n"      # (A.R)
+             if (defined($self->get_conf('DEFAULT_RULE'))
+                 and !$self->get_conf('VERTICAL_HEAD_NAVIGATION'));
+         } elsif ($self->get_conf('SPLIT') eq 'section') {
+@@ -2287,7 +2373,7 @@
+   }
+ 
+   my $element_id = $self->command_id($command);
+-  $result .= "<a name=\"$element_id\"></a>\n" 
++  $result .= "<a id=\"$element_id\"></a>\n" 
+     if (defined($element_id) and $element_id ne '');
+ 
+   print STDERR "Process $command "
+@@ -2426,7 +2512,7 @@
+ {
+   my $content = shift;
+ 
+-  return '<table><tr><td>&nbsp;</td><td>'.$content."</td></tr></table>\n";
++  return '<table><tr><td>&#160;</td><td>'.$content."</td></tr></table>\n";
+ }
+ 
+ my $html_menu_entry_index = 0;
+@@ -2549,7 +2635,7 @@
+     if ($self->in_preformatted() or $self->in_string()) {
+       return "\n" x $sp_nr;
+     } else {
+-      return "<br>\n" x $sp_nr;
++      return "<br/>\n" x $sp_nr;                                  # (A.R)
+     }
+   }
+ }
+@@ -2588,11 +2674,28 @@
+     return $self->_convert_preformatted_type($cmdname, $command, 
+                                              $args->[0]->{'normal'}."\n");
+   } else {
+-    return "<div align=\"center\">".$args->[0]->{'normal'}."\n</div>";
++    return "<div style=\"text-align: center\">".$args->[0]->{'normal'}."\n</div>";
+   }
+ }
+ 
++# (A.R) -->
++sub _convert_center_command_caption($$$$)
++{
++  my $self = shift;
++  my $cmdname = shift;
++  my $command = shift;
++  my $args = shift;
++
++  if ($self->in_string()) {
++    return $self->_convert_preformatted_type($cmdname, $command, 
++                                             $args->[0]->{'normal'}."\n");
++  } else {
++    return "<figcaption style=\"text-align: center\">".$args->[0]->{'normal'}."\n</figcaption>";
++  }
++}   # --> (A.R)
++
+ $default_commands_conversion{'center'} = \&_convert_center_command;
++$default_commands_conversion{'centercaption'} = \&_convert_center_command_caption;    # (A.R)
+ 
+ sub _convert_author_command($$$$)
+ {
+@@ -2603,7 +2706,7 @@
+ 
+   return '' if (!$args->[0] or !$command->{'extra'}->{'titlepage'});
+   if (!$self->in_string()) {
+-    return "<strong>$args->[0]->{'normal'}</strong><br>\n";
++    return "<strong>$args->[0]->{'normal'}</strong><br/>\n";                # (A.R)
+   } else {
+     return $args->[0]->{'normal'}."\n";
+   }
+@@ -2634,7 +2737,7 @@
+   my $args = shift;
+   return '' if (!$args->[0]);
+   if (!$self->in_string()) {
+-    return "<h3 align=\"right\">$args->[0]->{'normal'}</h3>\n";
++    return "<div class=\"subtitle\">$args->[0]->{'normal'}</div>\n";      # (A.R)
+   } else {
+     return $args->[0]->{'normal'};
+   }
+@@ -2741,7 +2844,7 @@
+     $end_row = '</td></tr>';
+   }
+   return $self->_attribute_class('table', 'menu')
+-    ." border=\"0\" cellspacing=\"0\">${begin_row}\n"
++    ." style=\"border-collapse: collapse; border-spacing: 0\">${begin_row}\n"
+       . $content . "${end_row}</table>\n";
+ }
+ $default_commands_conversion{'menu'} = \&_convert_menu_command;
+@@ -2777,7 +2880,7 @@
+   my $id = $self->command_id($command);
+   my $label;
+   if (defined($id) and $id ne '') {
+-    $label = "<a name=\"$id\"></a>";
++    $label = "<a id=\"$id\"></a>";
+   } else {
+     $label = '';
+   }
+@@ -2827,12 +2930,12 @@
+       $caption->{'args'}->[0], 'float caption');
+   }
+   if ($prepended_text.$caption_text ne '') {
+-    $prepended_text = $self->_attribute_class('div','float-caption'). '>'
+-        . $prepended_text;
+-    $caption_text .= '</div>';
++    $prepended_text = $self->_attribute_class('figcaption','float-caption'). '>' .          # (A.R)
++        "\n" . $prepended_text;
++    $caption_text .= "\n" . '</figcaption>';                                                # (A.R)
+   }
+-  return $self->_attribute_class('div','float'). '>' .$label."\n".$content.
+-     $prepended_text.$caption_text . '</div>';
++  return $self->_attribute_class('figure','float'). '>' .$label."\n".$content.              # (A.R)
++     $prepended_text.$caption_text . "\n" . '</figure>' . "\n";                             # (A.R)
+ }
+ $default_commands_conversion{'float'} = \&_convert_float_command;
+ 
+@@ -3013,7 +3116,7 @@
+       }
+       my $index_id = $self->command_id ($command);
+       if (defined($index_id) and $index_id ne '') {
+-        $result .= "\n<a name=\"$index_id\"></a>\n";
++        $result .= "\n<a id=\"$index_id\"></a>\n";
+       }
+     
+       return '<dt>' .$result. '</dt>' . "\n";
+@@ -3046,7 +3149,7 @@
+   if ($multitable->{'extra'}->{'columnfractions'} and 
+       exists($multitable->{'extra'}->{'columnfractions'}->[$cell_nr-1])) {
+     my $fraction = sprintf('%d', 100*$multitable->{'extra'}->{'columnfractions'}->[$cell_nr-1]);
+-    $fractions = " width=\"$fraction%\"";
++    $fractions = " style=\"width:$fraction%\"";    # (A.R)
+   }
+ 
+   $content =~ s/^\s*//;
+@@ -3317,7 +3420,7 @@
+   if (defined($index_id) and $index_id ne '' 
+       and !@{$self->{'multiple_pass'}} 
+       and !$self->in_string()) {
+-    my $result = "<a name=\"$index_id\"></a>";
++    my $result = "<a id=\"$index_id\"></a>";
+     $result .= "\n" unless ($self->in_preformatted());
+     return $result;
+   }
+@@ -3394,25 +3497,25 @@
+   my $join = '';
+   my $non_alpha_text = '';
+   my $alpha_text = '';
+-  $join = " &nbsp; \n<br>\n" if (@non_alpha and @alpha);
++  $join = " &#160; \n<br/>\n" if (@non_alpha and @alpha);           # (A.R)
+   if (@non_alpha) {
+-    $non_alpha_text = join("\n &nbsp; \n", @non_alpha) . "\n";
++    $non_alpha_text = join("\n &#160; \n", @non_alpha) . "\n";      # (A.R)
+   }
+   if (@alpha) {
+-    $alpha_text = join("\n &nbsp; \n", @alpha) . "\n &nbsp; \n";
++    $alpha_text = join("\n &#160; \n", @alpha) . "\n &#160; \n";    # (A.R)
+   }
+   # format the summary
+-  my $summary = "<table><tr><th valign=\"top\">" 
+-    . $self->convert_tree($self->gdt('Jump to')) .": &nbsp; </th><td>" .
++  my $summary = "<table><tr><th style=\"vertical-align: top\">" 
++    . $self->convert_tree($self->gdt('Jump to')) .": &#160; </th><td>" .    # (A.R)
+     $non_alpha_text . $join . $alpha_text . "</td></tr></table>\n";
+ 
+   $result .= $summary;
+ 
+   # now format the index entries
+   $result .= $self->_attribute_class('table', "index-$index_name")
+-    ." border=\"0\">\n" . "<tr><td></td><th align=\"left\">"
++    .">\n" . "<tr><td></td><th style=\"text-align: left\">"                 # (A.R)
+     . $self->convert_tree($self->gdt('Index Entry'))
+-    . "</th><td>&nbsp;</td><th align=\"left\"> "
++    . "</th><td>&#160;</td><th style=\"text-align: left\"> "                # (A.R)
+     .  $self->convert_tree($self->gdt('Section'))
+     ."</th></tr>\n" . "<tr><td colspan=\"4\"> ".$self->get_conf('DEFAULT_RULE')
+     ."</td></tr>\n";
+@@ -3467,17 +3570,17 @@
+         $associated_command_text = $self->command_text($associated_command);
+       }
+       
+-      $entries_text .= '<tr><td></td><td valign="top">' 
++      $entries_text .= '<tr><td></td><td style="vertical-align: top">' 
+          . "<a href=\"$entry_href\">$entry</a>" . 
+           $self->get_conf('INDEX_ENTRY_COLON') .
+-        '</td><td>&nbsp;</td><td valign="top">';
++        '</td><td>&#160;</td><td style="vertical-align: top">';            # (A.R)
+       $entries_text .= "<a href=\"$associated_command_href\">$associated_command_text</a>" 
+          if ($associated_command_href);
+        $entries_text .= "</td></tr>\n";
+     }
+     # a letter and associated indice entries
+     $result .= '<tr><th>' . 
+-    "<a name=\"$letter_id{$letter}\">".$self->protect_text($letter).'</a>'
++    "<a id=\"$letter_id{$letter}\">".$self->protect_text($letter).'</a>'
+         .  "</th><td></td><td></td></tr>\n" . $entries_text .
+        "<tr><td colspan=\"4\"> ".$self->get_conf('DEFAULT_RULE')."</td></tr>\n";
+ 
+@@ -3506,7 +3609,7 @@
+     if ($special_element) {
+       my $id = $self->command_id($special_element);
+       if ($id ne '') {
+-        $result .= "<a name=\"$id\"></a>\n";
++        $result .= "<a id=\"$id\"></a>\n";
+       }
+       $heading = $self->command_text($special_element);
+     } else {
+@@ -3624,7 +3727,7 @@
+   if ($content =~ /\S/) {
+     my $align = $self->in_align();
+     if ($align and $paragraph_style{$align}) {
+-      return "<p align=\"$paragraph_style{$align}\">".$content."</p>";
++      return "<p style=\"text-align: $paragraph_style{$align}\">".$content."</p>";
+     } else {
+       return "<p>".$content."</p>";
+     }
+@@ -3758,12 +3861,12 @@
+                                         ($self->in_code() or $self->in_math()));
+   } elsif (!$self->in_code() and !$self->in_math()) { 
+     if ($self->get_conf('USE_ISO')) {
+-      $text =~ s/---/\&mdash\;/g;
+-      $text =~ s/--/\&ndash\;/g;
+-      $text =~ s/``/\&ldquo\;/g;
+-      $text =~ s/''/\&rdquo\;/g;
+-      $text =~ s/'/\&rsquo\;/g;
+-      $text =~ s/`/\&lsquo\;/g;
++      $text =~ s/---/&#8212;/g;          # mdash      (A.R) -->
++      $text =~ s/--/&#8211;/g;           # ndash
++      $text =~ s/``/&#8220;/g;           # ldquo
++      $text =~ s/''/&#8221;/g;           # rdquo
++      $text =~ s/'/&#8217;/g;            # rsquo
++      $text =~ s/`/&#8216;/g;            # lsquo      --> (A.R)
+     } else {
+       $text =~ s/``/&quot;/g;
+       $text =~ s/''/&quot;/g;
+@@ -3920,7 +4023,7 @@
+     if ($href ne '') {
+       $name = "<a href=\"$href\"$accesskey>".$name."</a>";
+     }
+-    $name = "$MENU_SYMBOL ".$name;
++    #$name = "$MENU_SYMBOL ".$name;           # (A.R)
+   }
+   my $description = '';
+   if ($command->{'extra'}->{'menu_entry_description'}) {
+@@ -3931,7 +4034,7 @@
+                            eq _simplify_text_for_comparison($description));
+     }
+   }
+-  return "<tr><td align=\"left\" valign=\"top\">$name$MENU_ENTRY_COLON</td><td>&nbsp;&nbsp;</td><td align=\"left\" valign=\"top\">$description</td></tr>\n";
++  return "<tr><td style=\"text-align: left; vertical-align: top\">$name$MENU_ENTRY_COLON</td><td>&#160;&#160;</td><td style=\"text-align: left; vertical-align: top\">$description</td></tr>\n";    # nbsp  (A.R)
+ }
+ 
+ $default_types_conversion{'menu_entry'} = \&_convert_menu_entry_type;
+@@ -3946,7 +4049,7 @@
+   if ($self->_in_preformatted_in_menu() or $self->in_string()) {
+     return $content;
+   } else {
+-    return "<tr><th colspan=\"3\" align=\"left\" valign=\"top\">".$content
++    return "<tr><th colspan=\"3\" style=\"text-align: left; vertical-align: top\">".$content
+        ."</th></tr>";
+   }
+ }
+@@ -3993,7 +4096,7 @@
+   my $index_label = '';
+   my $index_id = $self->command_id($command);
+   if (defined($index_id) and $index_id ne '' and !@{$self->{'multiple_pass'}}) {
+-    $index_label = "<a name=\"$index_id\"></a>";
++    $index_label = "<a id=\"$index_id\"></a>";
+   }
+   my $arguments
+     = Texinfo::Common::definition_arguments_content($command);
+@@ -4210,8 +4313,8 @@
+     $type_name .= ' <strong>' . $name . '</strong>' if ($name ne '');
+     $type_name .= $arguments_text;
+ 
+-    return "<tr><td align=\"left\">" . $type_name .
+-       "</td><td align=\"right\">" . $category_prepared . 
++    return "<tr><td style=\"text-align: left\">" . $type_name .
++       "</td><td style=\"text-align: right\">" . $category_prepared . 
+        $index_label . "</td></tr>\n";
+   }
+ }
+@@ -4290,7 +4393,7 @@
+       or !$command->{'parent'}->{'type'}
+       or $command->{'parent'}->{'type'} ne 'element') {
+     $result .= &{$self->{'format_footnotes_text'}}($self);
+-    $result .= $self->get_conf('DEFAULT_RULE') ."\n",
++    $result .= $self->get_conf('DEFAULT_RULE') ."\n\n",           # (A.R)
+       if ($self->get_conf('PROGRAM_NAME_IN_FOOTER') 
+           and defined($self->get_conf('DEFAULT_RULE'))
+           and !$self->in_string());
+@@ -4313,7 +4416,7 @@
+           and $self->get_conf('set'.$command.'aftertitlepage')) {
+         my $contents_text = $self->_contents_inline_element($command, undef);
+         if ($contents_text ne '') {
+-          $result .= $contents_text . $self->get_conf('DEFAULT_RULE')."\n";
++          $result .= $contents_text . $self->get_conf('DEFAULT_RULE')."\n\n";       # (A.R)
+         }
+       }
+     }
+@@ -4338,7 +4441,7 @@
+                      'contents' => $self->{'simpletitle_tree'}->{'contents'}});
+   }
+   my $result = '';
+-  $result .= $titlepage_text.$self->get_conf('DEFAULT_RULE')."\n"
++  $result .= $titlepage_text.$self->get_conf('DEFAULT_RULE')."\n\n"       # (A.R)
+     if (defined($titlepage_text));
+   $result .= $self->_contents_shortcontents_in_title();
+   return $result;
+@@ -4394,7 +4497,7 @@
+     $special_element = $element->{'extra'}->{'special_element'};
+     my $id = $self->command_id($element);
+     if ($id ne '') {
+-      $result .= "<a name=\"$id\"></a>\n";
++      $result .= "<a id=\"$id\"></a>\n";
+     }
+     if ($self->get_conf('HEADERS') 
+         # first in page
+@@ -4426,7 +4529,7 @@
+     if (!$element->{'element_next'}) {
+       # only one element
+       my $foot_text = &{$self->{'format_footnotes_text'}}($self);
+-      return $result.$content.$foot_text.$self->get_conf('DEFAULT_RULE')."\n";
++      return $result.$content.$foot_text.$self->get_conf('DEFAULT_RULE')."\n\n";      # (A.R)
+     }
+   }
+   $result .= $content unless ($special_element);
+@@ -4788,20 +4891,20 @@
+   return if (!@{$self->{'css_import_lines'}} and !@{$self->{'css_rule_lines'}}
+              and !keys(%{$self->{'css_map'}}) and !@$css_refs);
+ 
+-  my $css_text = "<style type=\"text/css\">\n<!--\n";
+-  $css_text .= join('',@{$self->{'css_import_lines'}}) . "\n" 
+-    if (@{$self->{'css_import_lines'}});
+-  foreach my $css_rule (sort(keys(%{$self->{'css_map'}}))) {
+-    next unless ($self->{'css_map'}->{$css_rule});
+-    $css_text .= "$css_rule {$self->{'css_map'}->{$css_rule}}\n";
+-  }
+-  $css_text .= join('',@{$self->{'css_rule_lines'}}) . "\n" 
+-    if (@{$self->{'css_rule_lines'}});
+-  $css_text .= "-->\n</style>\n";
+-  foreach my $ref (@$css_refs) {
+-    $css_text .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"$ref\">\n";
+-  }
+-  $self->set_conf('CSS_LINES', $css_text);
++# my $css_text = "<style type=\"text/css\">\n";                     # (A.R) -->
++# $css_text .= join('',@{$self->{'css_import_lines'}}) . "\n" 
++#   if (@{$self->{'css_import_lines'}});
++# foreach my $css_rule (sort(keys(%{$self->{'css_map'}}))) {
++#   next unless ($self->{'css_map'}->{$css_rule});
++#   $css_text .= "$css_rule {$self->{'css_map'}->{$css_rule}}\n";
++# }
++# $css_text .= join('',@{$self->{'css_rule_lines'}}) . "\n" 
++#   if (@{$self->{'css_rule_lines'}});
++# $css_text .= "</style>\n";
++# foreach my $ref (@$css_refs) {
++#   $css_text .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"$ref\">\n";
++# }
++# $self->set_conf('CSS_LINES', $css_text);                          # --> (A.R)
+ }
+ 
+ sub _process_css_file($$$)
+@@ -6021,7 +6124,7 @@
+           if ($toc_id ne '' or $href ne '') {
+             my $toc_name_attribute = '';
+             if ($toc_id ne '') {
+-              $toc_name_attribute = "name=\"$toc_id\" ";
++              $toc_name_attribute = "id=\"$toc_id\" ";
+             }
+             my $href_attribute = '';
+             if ($href ne '') {
+@@ -6153,12 +6256,12 @@
+   } else {
+     $description = $title;
+   }
+-  $description = "<meta name=\"description\" content=\"$description\">" 
++  $description = "<meta name=\"description\" content=\"$description\"/>" 
+     if ($description ne '');
+   my $encoding = '';
+   $encoding 
+-     = "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=".
+-       $self->get_conf('OUTPUT_ENCODING_NAME')."\">" 
++     = "<meta charset=\"".      # (A.R)
++       $self->get_conf('OUTPUT_ENCODING_NAME')."\"/>" 
+     if (defined($self->get_conf('OUTPUT_ENCODING_NAME')) 
+         and ($self->get_conf('OUTPUT_ENCODING_NAME') ne ''));
+ 
+@@ -6166,7 +6269,7 @@
+   if ($self->get_conf('DATE_IN_HEADER')) {
+     my $today = $self->convert_tree_new_formatting_context(
+             {'cmdname' => 'today'}, 'DATE_IN_HEADER');
+-    $date = "\n<meta name=\"date\" content=\"$today\">";
++    $date = "\n<meta name=\"date\" content=\"$today\"/>";
+   }
+ 
+   my $css_lines;
+@@ -6191,7 +6294,7 @@
+   my $program = $self->get_conf('PROGRAM');
+   my $generator = '';
+   if (defined($program) and $program ne '') {
+-    $generator = "\n<meta name=\"Generator\" content=\"$program\">";
++    $generator = "\n<meta name=\"Generator\" content=\"$program\"/>";
+   }
+ 
+   return ($title, $description, $encoding, $date, $css_lines, 
+@@ -6221,7 +6324,7 @@
+         my $rel = '';
+         $rel = " rel=\"".$self->get_conf('BUTTONS_REL')->{$link}.'"' 
+            if (defined($self->get_conf('BUTTONS_REL')->{$link}));
+-        $links .= "<link href=\"$link_href\"${rel}${link_title}>\n";
++        $links .= "<link href=\"$link_href\"${rel}${link_title}/>\n";
+       }
+     }
+   }
+@@ -6246,22 +6349,22 @@
+ 
+   my $links = $self->_get_links ($filename, $element);
+ 
++  # (A.R)
+   my $result = "$doctype
+-<html>
++<html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:epub=\"http://www.idpf.org/2007/ops\" xml:lang=\"en\" $bodytext>
+ $copying_comment<!-- Created by $program_and_version, $program_homepage -->
+ <head>
+ <title>$title</title>
+ 
+ $description
+-<meta name=\"keywords\" content=\"$title\">
+-<meta name=\"resource-type\" content=\"document\">
+-<meta name=\"distribution\" content=\"global\">${generator}$date
++<meta name=\"keywords\" content=\"$title\"/>
++<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/>${generator}$date
+ $encoding
+ ${links}$css_lines
+ $extra_head
+ </head>
+ 
+-<body $bodytext>
++<body>
+ $after_body_open";
+ 
+   return $result;
+@@ -6291,19 +6394,19 @@
+ <title>$title</title>
+ 
+ $description
+-<meta name=\"keywords\" content=\"$title\">
+-<meta name=\"resource-type\" content=\"document\">
+-<meta name=\"distribution\" content=\"global\">${generator}$date
++<meta name=\"keywords\" content=\"$title\"/>${generator}$date
+ $encoding
+ $css_lines
+-<meta http-equiv=\"Refresh\" content=\"0; url=$href\">
++<meta http-equiv=\"Refresh\" content=\"0; url=$href\"/>
+ $extra_head
+ </head>
+ 
+ <body $bodytext>
+ $after_body_open
+ <p>$string</p>
++</section>
+ </body>
++</html>
+ ";
+   return $result;
+ }
+@@ -6313,7 +6416,7 @@
+   my $self = shift;
+   return '' if (!$foot_lines);
+   my $result = $self->_attribute_class('div', 'footnote').">\n";
+-  $result .= $self->get_conf('DEFAULT_RULE') . "\n" 
++  $result .= $self->get_conf('DEFAULT_RULE') . "\n\n"       # (A.R)
+      if (defined($self->get_conf('DEFAULT_RULE')) 
+          and $self->get_conf('DEFAULT_RULE') ne '');
+   my $footnote_heading 
+@@ -6365,7 +6468,7 @@
+       next if ($button eq ' ' or ref($button) eq 'CODE' or ref($button) eq 'SCALAR' 
+                 or ref($button) eq 'ARRAY');
+       my $button_name = $self->get_conf('BUTTONS_NAME')->{$button};
+-      $about .= "  <tr>\n    <td align=\"center\">";
++      $about .= "  <tr>\n    <td style=\"text-align: center\">";
+       $about .=
+             ($self->get_conf('ICONS') && $self->get_conf('ACTIVE_ICONS')->{$button} ?
+              &{$self->{'format_button_icon_img'}}($self, $button_name, 
+@@ -6373,7 +6476,7 @@
+              ' [' . $self->get_conf('BUTTONS_TEXT')->{$button} . '] ');
+       $about .= "</td>\n";
+       $about .= 
+-"    <td align=\"center\">".$button_name."</td>
++"    <td style=\"text-align: center\">".$button_name."</td>
+     <td>".$self->get_conf('BUTTONS_GOTO')->{$button}."</td>
+     <td>".$self->get_conf('BUTTONS_EXAMPLE')->{$button}."</td>
+   </tr>
+@@ -6408,7 +6511,7 @@
+ "        <ul>\n" .
+ '          <li>1.2.1 ' . $self->convert_tree($self->gdt('Subsubsection One-Two-One')) . "</li>\n" .
+ '          <li>1.2.2 ' . $self->convert_tree($self->gdt('Subsubsection One-Two-Two')) . "</li>\n" .
+-'          <li>1.2.3 ' . $self->convert_tree($self->gdt('Subsubsection One-Two-Three')) . " &nbsp; &nbsp;\n"
++'          <li>1.2.3 ' . $self->convert_tree($self->gdt('Subsubsection One-Two-Three')) . " &#160; &#160;\n"      # (A.R)
+ .
+ '            <strong>&lt;== ' . $self->convert_tree($self->gdt('Current Position')) . " </strong></li>\n" .
+ '          <li>1.2.4 ' . $self->convert_tree($self->gdt('Subsubsection One-Two-Four')) . "</li>\n" .
+@@ -7241,9 +7344,9 @@
+     }
+   }
+   if ($in_w) {
+-    $text .= '&nbsp;' if (chomp($text));
++    $text .= '&#160;' if (chomp($text));                      # (A.R)
+     # protect spaces within text
+-    $text =~ s/ /&nbsp;/g;
++    $text =~ s/ /&#160;/g;                                    # (A.R)
+     # revert protected spaces in leading html attribute
+     $text =~ s/\x{1F}/ /g;
+   }
+@@ -7611,11 +7714,11 @@
+   ['USE_TITLEPAGE_FOR_TITLE', 1],
+   ['MENU_ENTRY_COLON', ''],
+   ['INDEX_ENTRY_COLON', ''],
+-  ['ENABLE_ENCODING_USE_ENTITY', 1],
++  ['ENABLE_ENCODING_USE_ENTITY', 0],      # (A.R)
+   ['DO_ABOUT', undef],
+   ['NODE_NAME_IN_INDEX', 0],
+   ['CHAPTER_HEADER_LEVEL', 1],
+-  ['BIG_RULE', '<hr size="6">'],
++  ['BIG_RULE', '<hr size="6" />'],        # (A.R)
+   ['FOOTNOTE_END_HEADER_LEVEL', 3],
+   ['FOOTNOTE_SEPARATE_HEADER_LEVEL', 1],
+   ['KEEP_TOP_EXTERNAL_REF', 1],

@@ -1,8 +1,11 @@
 # sicp-builder
 
 A containerized builder for the [sicp](https://github.com/sarabander/sicp) project.
-The image uses Ruby 3.4, Node.js and the distribution's Perl package. It retains
-Texinfo 5.1, because the upstream converter depends on it.
+The image uses Ruby 3.4, Node.js and the distribution's Perl package. Upstream
+targets Texinfo 5.1 with a modified `HTML.pm`; [texinfo-sicp.patch](texinfo-sicp.patch)
+ports those modifications to Texinfo 6.0, which is built from the tarball. The HTML
+it produces is identical to the 5.1 output apart from the generator comment.
+Texinfo 7 is not an option: its converter was rewritten and would need a full port.
 
 Upstream's PhantomJS scripts are replaced by the Node ports in [scripts/](scripts):
 LaTeX is converted to MathML with MathJax 3 (`mathjax-full`, no network access

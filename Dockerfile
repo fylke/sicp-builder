@@ -15,6 +15,7 @@ RUN apk add --no-cache \
     make \
     nodejs \
     npm \
+    patch \
     perl \
     tar \
     wget \
@@ -32,9 +33,16 @@ RUN sed -i "s/-e \$(THUMB) -f \$(DIR)fig/-o \$(THUMB) \$(DIR)fig/" Makefile \
 
 RUN ["ln", "-s", "/usr/local/bin/ruby", "/usr/bin/ruby"]
 
-RUN wget -q https://ftp.gnu.org/gnu/texinfo/texinfo-5.1.tar.gz \
-    && echo "50e8067f9758bb2bf175b69600082ac4a27c464cb4bcd48a578edd3127216600  texinfo-5.1.tar.gz" | sha256sum -c - \
-    && tar -xf texinfo-5.1.tar.gz
+# Upstream targets Texinfo 5.1 and ships a modified HTML.pm. texinfo-sicp.patch
+# carries those modifications over to 6.0, and texi2any is built from the
+# tarball in place of the copy in the upstream repo.
+COPY texinfo-sicp.patch /
+RUN wget -q https://ftp.gnu.org/gnu/texinfo/texinfo-6.0.tar.gz \
+    && echo "83d3183290f34e7f958d209d0b20022c6fe9e921eb6fe94c27d988827d4878d2  texinfo-6.0.tar.gz" | sha256sum -c - \
+    && tar -xf texinfo-6.0.tar.gz \
+    && patch -p1 -d texinfo-6.0 < /texinfo-sicp.patch \
+    && (cd texinfo-6.0 && ./configure -q && make -C tp texi2any) \
+    && cp texinfo-6.0/tp/texi2any texi2any
 # The cover SVG needs Alegreya (variable TTF, OFL), pinned by google/fonts commit.
 ARG ALEGREYA_URL=https://raw.githubusercontent.com/google/fonts/199711f8c8d2cafc88f26c174152abfa18eb62c3/ofl/alegreya/Alegreya%5Bwght%5D.ttf
 RUN mkdir -p /usr/share/fonts/alegreya \
@@ -49,11 +57,11 @@ RUN npm ci --omit=dev --no-audit --no-fund
 COPY --chmod=755 scripts/get-math.js scripts/put-math.js scripts/batch-prettify.js ./
 
 ENV PERL5LIB \
-"/sicp/texinfo-5.1/tp:\
-/sicp/texinfo-5.1/tp/maintain/lib/libintl-perl/lib:\
-/sicp/texinfo-5.1/tp/maintain/lib/Unicode-EastAsianWidth/lib:\
-/sicp/texinfo-5.1/tp/maintain/lib/Text-Unidecode/lib:\
-/sicp/texinfo-5.1/Pod-Simple-Texinfo/lib"
+"/sicp/texinfo-6.0/tp:\
+/sicp/texinfo-6.0/tp/maintain/lib/libintl-perl/lib:\
+/sicp/texinfo-6.0/tp/maintain/lib/Unicode-EastAsianWidth/lib:\
+/sicp/texinfo-6.0/tp/maintain/lib/Text-Unidecode/lib:\
+/sicp/texinfo-6.0/Pod-Simple-Texinfo/lib"
 
 # -B regenerates the HTML instead of reusing the files committed upstream.
 # The Makefile does not fail when math conversion goes wrong, so check it here.
