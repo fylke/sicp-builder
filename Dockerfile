@@ -1,48 +1,38 @@
-FROM ruby:3.0-alpine
+FROM docker.io/library/ruby:3.4-alpine
 
-RUN apk update
-RUN apk add --no-cache gcc
-RUN apk add --no-cache libc-dev
-RUN apk add --no-cache gcompat
-RUN apk add --no-cache make
-RUN apk add --no-cache bash
-RUN apk add --no-cache wget
-RUN apk add --no-cache tar
-RUN apk add --no-cache git
-RUN apk add --no-cache fontconfig
-RUN apk add --no-cache msttcorefonts-installer
-RUN apk add --no-cache inkscape
-RUN apk add --no-cache zip
-RUN apk add --no-cache grep
+ARG SICP_REF=bda03f79d6e2e8899ac2b5ca6a3732210e290a79
 
+RUN apk add --no-cache \
+    bash \
+    fontconfig \
+    gcc \
+    gcompat \
+    git \
+    grep \
+    inkscape \
+    libc-dev \
+    make \
+    msttcorefonts-installer \
+    perl \
+    tar \
+    wget \
+    zip
 
-RUN gem install nokogiri
+RUN gem install --no-document nokogiri
 
-RUN git clone https://github.com/sarabander/sicp.git
+RUN git init /sicp \
+    && git -C /sicp fetch --depth 1 https://github.com/sarabander/sicp.git "$SICP_REF" \
+    && git -C /sicp checkout --detach FETCH_HEAD
 COPY inkscape.patch /sicp/inkscape.patch
 WORKDIR /sicp
 RUN git apply inkscape.patch
 
-RUN wget http://www.cpan.org/src/5.0/perl-5.12.2.tar.gz
-RUN tar -xvf perl-5.12.2.tar.gz
-WORKDIR /sicp/perl-5.12.2
-RUN ["./Configure", "-Dcc=gcc", "-e", "-d",\
-     "-Dprefix=/opt/perl-5.12.2-emg",\
-     "-Duseithreads",\
-     "-Dusethreads",\
-     "-Duselargefiles"]
-RUN ["make"]
-RUN ["make", "install"]
-RUN ["ln", "-s", "/opt/perl-5.12.2-emg/bin/perl", "/usr/bin/perl"]
 RUN ["ln", "-s", "/usr/local/bin/ruby", "/usr/bin/ruby"]
 
 WORKDIR /sicp
 RUN wget https://ftp.gnu.org/gnu/texinfo/texinfo-5.1.tar.gz
 RUN tar -xvf texinfo-5.1.tar.gz
 WORKDIR /sicp/texinfo-5.1
-RUN ["./configure", "--prefix=/usr"]
-RUN ["make"]
-RUN ["make", "install"]
 
 WORKDIR /sicp
 RUN wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2
@@ -60,5 +50,6 @@ ENV PATH \
 "/sicp/phantomjs-2.1.1-linux-x86_64/bin:\
 ${PATH}"
 
+RUN make all
+
 CMD ["sleep", "infinity"]
-#RUN ["make", "all"]
