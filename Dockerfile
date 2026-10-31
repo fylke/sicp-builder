@@ -4,6 +4,7 @@ ARG SICP_REF=bda03f79d6e2e8899ac2b5ca6a3732210e290a79
 
 RUN apk add --no-cache \
     bash \
+    font-linux-libertine \
     fontconfig \
     gcc \
     gcompat \
@@ -12,7 +13,6 @@ RUN apk add --no-cache \
     inkscape \
     libc-dev \
     make \
-    msttcorefonts-installer \
     nodejs \
     npm \
     perl \
@@ -25,15 +25,21 @@ RUN gem install --no-document nokogiri
 RUN git init /sicp \
     && git -C /sicp fetch --depth 1 https://github.com/sarabander/sicp.git "$SICP_REF" \
     && git -C /sicp checkout --detach FETCH_HEAD
-COPY inkscape.patch /sicp/inkscape.patch
 WORKDIR /sicp
-RUN git apply inkscape.patch
+# Inkscape 1.x dropped the -e/-f flags the upstream Makefile uses.
+RUN sed -i "s/-e \$(THUMB) -f \$(DIR)fig/-o \$(THUMB) \$(DIR)fig/" Makefile \
+    && grep -q -- "-o \$(THUMB)" Makefile
 
 RUN ["ln", "-s", "/usr/local/bin/ruby", "/usr/bin/ruby"]
 
 RUN wget https://ftp.gnu.org/gnu/texinfo/texinfo-5.1.tar.gz
 RUN tar -xvf texinfo-5.1.tar.gz
-RUN update-ms-fonts
+# The cover SVG needs Alegreya (variable TTF, OFL), pinned by google/fonts commit.
+ARG ALEGREYA_URL=https://raw.githubusercontent.com/google/fonts/199711f8c8d2cafc88f26c174152abfa18eb62c3/ofl/alegreya/Alegreya%5Bwght%5D.ttf
+RUN mkdir -p /usr/share/fonts/alegreya \
+    && wget -O /usr/share/fonts/alegreya/Alegreya.ttf "$ALEGREYA_URL" \
+    && echo "ba5564634b93a8f8ba57b48cd4f1ae7417d2b4656fbac779028679b00de3cf12  /usr/share/fonts/alegreya/Alegreya.ttf" | sha256sum -c - \
+    && fc-cache -f
 
 # Node replacements for the upstream PhantomJS scripts (same file names, so the
 # upstream Makefile is used unchanged).
