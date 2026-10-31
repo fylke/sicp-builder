@@ -1,0 +1,23 @@
+name: Build EPUB
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # The epub stage runs EPUBCheck, so a successful build means a valid EPUB.
+      - name: Build and validate EPUB
+        run: docker build --target epub --output type=local,dest=out .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sicp-epub
+          path: out/sicp.epub
+          if-no-files-found: error

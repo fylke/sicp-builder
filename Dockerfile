@@ -1,4 +1,4 @@
-FROM docker.io/library/ruby:3.4-alpine AS build
+FROM docker.io/library/ruby:3.4-alpine3.24 AS build
 
 ARG SICP_REF=bda03f79d6e2e8899ac2b5ca6a3732210e290a79
 
@@ -32,8 +32,9 @@ RUN sed -i "s/-e \$(THUMB) -f \$(DIR)fig/-o \$(THUMB) \$(DIR)fig/" Makefile \
 
 RUN ["ln", "-s", "/usr/local/bin/ruby", "/usr/bin/ruby"]
 
-RUN wget https://ftp.gnu.org/gnu/texinfo/texinfo-5.1.tar.gz
-RUN tar -xvf texinfo-5.1.tar.gz
+RUN wget -q https://ftp.gnu.org/gnu/texinfo/texinfo-5.1.tar.gz \
+    && echo "50e8067f9758bb2bf175b69600082ac4a27c464cb4bcd48a578edd3127216600  texinfo-5.1.tar.gz" | sha256sum -c - \
+    && tar -xf texinfo-5.1.tar.gz
 # The cover SVG needs Alegreya (variable TTF, OFL), pinned by google/fonts commit.
 ARG ALEGREYA_URL=https://raw.githubusercontent.com/google/fonts/199711f8c8d2cafc88f26c174152abfa18eb62c3/ofl/alegreya/Alegreya%5Bwght%5D.ttf
 RUN mkdir -p /usr/share/fonts/alegreya \
