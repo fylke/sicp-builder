@@ -13,6 +13,8 @@ RUN apk add --no-cache \
     libc-dev \
     make \
     msttcorefonts-installer \
+    nodejs \
+    npm \
     perl \
     tar \
     wget \
@@ -29,27 +31,28 @@ RUN git apply inkscape.patch
 
 RUN ["ln", "-s", "/usr/local/bin/ruby", "/usr/bin/ruby"]
 
-WORKDIR /sicp
 RUN wget https://ftp.gnu.org/gnu/texinfo/texinfo-5.1.tar.gz
 RUN tar -xvf texinfo-5.1.tar.gz
-WORKDIR /sicp/texinfo-5.1
-
-WORKDIR /sicp
-RUN wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2
-RUN tar -xvf phantomjs-2.1.1-linux-x86_64.tar.bz2
 RUN update-ms-fonts
 
-WORKDIR /sicp
+# Node replacements for the upstream PhantomJS scripts (same file names, so the
+# upstream Makefile is used unchanged).
+COPY scripts/package.json scripts/package-lock.json ./
+RUN npm ci --omit=dev --no-audit --no-fund
+COPY --chmod=755 scripts/get-math.js scripts/put-math.js scripts/batch-prettify.js ./
+
 ENV PERL5LIB \
 "/sicp/texinfo-5.1/tp:\
 /sicp/texinfo-5.1/tp/maintain/lib/libintl-perl/lib:\
 /sicp/texinfo-5.1/tp/maintain/lib/Unicode-EastAsianWidth/lib:\
 /sicp/texinfo-5.1/tp/maintain/lib/Text-Unidecode/lib:\
 /sicp/texinfo-5.1/Pod-Simple-Texinfo/lib"
-ENV PATH \
-"/sicp/phantomjs-2.1.1-linux-x86_64/bin:\
-${PATH}"
 
-RUN make all
+# -B regenerates the HTML instead of reusing the files committed upstream.
+# The Makefile does not fail when math conversion goes wrong, so check it here.
+RUN make -B all \
+    && grep -q '<math ' html/*.xhtml \
+    && ! grep -lE "color:blue|class='faulty'" html/*.xhtml \
+    && test -s /sicp.epub
 
 CMD ["sleep", "infinity"]

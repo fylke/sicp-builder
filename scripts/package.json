@@ -1,0 +1,9 @@
+{
+  "name": "sicp-builder-scripts",
+  "private": true,
+  "description": "Node replacements for the PhantomJS scripts in sarabander/sicp",
+  "dependencies": {
+    "jsdom": "26.1.0",
+    "mathjax-full": "3.2.2"
+  }
+}

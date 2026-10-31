@@ -1,10 +1,16 @@
 # sicp-builder
 
 A containerized builder for the [sicp](https://github.com/sarabander/sicp) project.
-The image uses Ruby 3.4 and the distribution's Perl package. It retains Texinfo 5.1
-and PhantomJS 2.1.1 because the upstream converter and scripts depend on them. The
-image packages the upstream project's checked-in HTML into an EPUB. Regenerating that
-HTML still needs a migration away from PhantomJS and the retired MathJax CDN.
+The image uses Ruby 3.4, Node.js and the distribution's Perl package. It retains
+Texinfo 5.1, because the upstream converter depends on it.
+
+Upstream's PhantomJS scripts are replaced by the Node ports in [scripts/](scripts):
+LaTeX is converted to MathML with MathJax 3 (`mathjax-full`, no network access
+needed) and Scheme code is highlighted with the bundled code-prettify run in jsdom.
+The scripts keep their upstream file names, so the upstream `Makefile` is used as is.
+The build regenerates all HTML (`make -B all`) and fails if any LaTeX could not be
+converted. MathML attributes differ cosmetically from the committed upstream HTML
+(MathJax 3 emits `data-mjx-texclass` where MathJax 2 emitted `class="MJX-TeXAtom-*"`).
 
 Build the image with `docker build -t sicp-builder .`. By default, it fetches the
 upstream revision pinned in the Dockerfile and builds the EPUB during image creation.
