@@ -7,7 +7,6 @@ RUN apk add --no-cache \
     font-linux-libertine \
     fontconfig \
     gcc \
-    gcompat \
     git \
     grep \
     inkscape \
@@ -70,7 +69,7 @@ RUN make -B all \
     && ! grep -lE "color:blue|class='faulty'" html/*.xhtml \
     && test -s /sicp.epub
 
-FROM docker.io/library/eclipse-temurin:21-jre-alpine AS validate
+FROM docker.io/library/eclipse-temurin:21-jre-alpine-3.24 AS validate
 
 ARG EPUBCHECK_VERSION=5.4.0
 ARG EPUBCHECK_SHA256=33350c61038e71dfb3d45a76aed04bf5481e6d5500cb780f6e98db8bbd15a28c

@@ -6,14 +6,10 @@ multi-stage build gated by EPUBCheck, proper cover fonts, Texinfo 6.0 via
 
 ## Remaining
 
-1. **Check the CI workflow.** `.github/workflows/build.yml` has not run on GitHub yet.
-   Confirm the first run passes and the `sicp-epub` artifact is uploaded.
-2. **Pin the validate stage.** `eclipse-temurin:21-jre-alpine` is unpinned; pin a tag
-   or digest.
-3. **Tidy the Dockerfile.**
-   - Drop `gcompat` (was for PhantomJS) if the build still passes without it.
-   - Replace the `ln -s /usr/local/bin/ruby /usr/bin/ruby` hack with a shebang-safe fix.
-   - Merge the separate `wget`/`tar` steps and clean up build-only packages.
+1. ~~Check the CI workflow~~ Done: runs pass and upload the artifact.
+2. ~~Pin the validate stage~~ Done: `eclipse-temurin:21-jre-alpine-3.24`.
+3. ~~Tidy the Dockerfile~~ Partly done: `gcompat` dropped. The `ruby` symlink
+   stays (the upstream scripts use `#!/usr/bin/ruby`).
 4. **Stronger EPUB checks.** EPUBCheck only validates structure. Add content checks
    (expected chapter count, MathML present, cover image non-trivial, no missing
    fonts in the cover render).
