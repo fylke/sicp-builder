@@ -1,0 +1,55 @@
+#lang sicp
+(#%provide union-set intersection-set)
+
+(define (entry tree) (car tree))
+(define (left-branch tree) (cadr tree))
+(define (right-branch tree) (caddr tree))
+(define (make-tree entry left right) (list entry left right))
+
+(define (tree->list tree)
+  (define (copy-to-list tree result-list)
+    (if (null? tree)
+        result-list
+        (copy-to-list (left-branch tree)
+                      (cons (entry tree)
+                            (copy-to-list (right-branch tree) result-list)))))
+  (copy-to-list tree '()))
+
+(define (list->tree elements)
+  (car (partial-tree elements (length elements))))
+
+(define (partial-tree elts n)
+  (if (= n 0)
+      (cons '() elts)
+      (let ((left-size (quotient (- n 1) 2)))
+        (let ((left-result (partial-tree elts left-size)))
+          (let ((left-tree (car left-result))
+                (non-left-elts (cdr left-result))
+                (right-size (- n (+ left-size 1))))
+            (let ((this-entry (car non-left-elts))
+                  (right-result (partial-tree (cdr non-left-elts) right-size)))
+              (let ((right-tree (car right-result))
+                    (remaining-elts (cdr right-result)))
+                (cons (make-tree this-entry left-tree right-tree)
+                      remaining-elts))))))))
+
+(define (union-list a b)
+  (cond ((null? a) b)
+        ((null? b) a)
+        ((= (car a) (car b)) (cons (car a) (union-list (cdr a) (cdr b))))
+        ((< (car a) (car b)) (cons (car a) (union-list (cdr a) b)))
+        (else (cons (car b) (union-list a (cdr b))))))
+
+(define (intersection-list a b)
+  (if (or (null? a) (null? b))
+      '()
+      (let ((x (car a)) (y (car b)))
+        (cond ((= x y) (cons x (intersection-list (cdr a) (cdr b))))
+              ((< x y) (intersection-list (cdr a) b))
+              (else (intersection-list a (cdr b)))))))
+
+(define (union-set s1 s2)
+  (list->tree (union-list (tree->list s1) (tree->list s2))))
+
+(define (intersection-set s1 s2)
+  (list->tree (intersection-list (tree->list s1) (tree->list s2))))

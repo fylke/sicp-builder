@@ -1,0 +1,41 @@
+- 2.09: explanation of interval widths
+- 2.13: explanation of tolerance approximation
+- 2.14: explanation / experiments with interval expressions
+- 2.15: explanation
+- 2.16: explanation
+- 2.22: explanation of why the iterative versions misbehave
+- 2.24: box-and-pointer diagram and printed result
+- 2.26: printed results of expressions
+- 2.43: timing / performance comparison
+- 2.44: picture language (painters), needs book painter code
+- 2.49: picture language (painters), needs book painter code
+- 2.50: picture language (painters), needs book painter code
+- 2.51: picture language (painters), needs book painter code
+- 2.52: picture language (painters), needs book painter code
+- 2.53: printed results of expressions
+- 2.55: explanation of a quoted expression
+- 2.71: tree sketches
+- 2.72: order-of-growth analysis
+- 2.74: open-ended design of a data-directed personnel system
+- 2.76: essay comparing design strategies
+- 2.77: trace/explanation, needs the book's generic complex-number packages
+- 2.78: needs the book's generic arithmetic package (apply-generic, put/get)
+- 2.79: needs the book's generic arithmetic package (apply-generic, put/get)
+- 2.80: needs the book's generic arithmetic package (apply-generic, put/get)
+- 2.81: needs the book's coercion system, partly explanation
+- 2.82: needs the book's coercion system (apply-generic, put-coercion)
+- 2.83: needs the book's generic arithmetic package and type tower
+- 2.84: needs the book's generic arithmetic package and type tower
+- 2.85: needs the book's generic arithmetic package and type tower
+- 2.86: needs the book's generic arithmetic package and type tower
+- 2.87: needs the book's polynomial package
+- 2.88: needs the book's polynomial package
+- 2.89: needs the book's polynomial package
+- 2.90: needs the book's polynomial package
+- 2.91: needs the book's polynomial package
+- 2.92: needs the book's polynomial package, open-ended
+- 2.93: needs the book's generic arithmetic and polynomial packages
+- 2.94: needs the book's generic arithmetic and polynomial packages
+- 2.95: needs the book's generic arithmetic and polynomial packages
+- 2.96: needs the book's generic arithmetic and polynomial packages
+- 2.97: needs the book's generic arithmetic and polynomial packages

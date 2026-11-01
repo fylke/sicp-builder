@@ -1,0 +1,51 @@
+#lang sicp
+(#%provide deriv)
+
+(define table '())
+(define (put op type item)
+  (set! table (cons (list op type item) table)))
+(define (get op type)
+  (define (find t)
+    (cond ((null? t) false)
+          ((and (eq? (car (car t)) op) (eq? (cadr (car t)) type)) (caddr (car t)))
+          (else (find (cdr t)))))
+  (find table))
+
+(define (variable? x) (symbol? x))
+(define (same-variable? v1 v2)
+  (and (variable? v1) (variable? v2) (eq? v1 v2)))
+
+(define (=number? exp num) (and (number? exp) (= exp num)))
+(define (make-sum a1 a2)
+  (cond ((=number? a1 0) a2)
+        ((=number? a2 0) a1)
+        ((and (number? a1) (number? a2)) (+ a1 a2))
+        (else (list '+ a1 a2))))
+(define (make-product m1 m2)
+  (cond ((or (=number? m1 0) (=number? m2 0)) 0)
+        ((=number? m1 1) m2)
+        ((=number? m2 1) m1)
+        ((and (number? m1) (number? m2)) (* m1 m2))
+        (else (list '* m1 m2))))
+
+(define (operator exp) (car exp))
+(define (operands exp) (cdr exp))
+
+(define (deriv exp var)
+  (cond ((number? exp) 0)
+        ((variable? exp) (if (same-variable? exp var) 1 0))
+        (else ((get 'deriv (operator exp)) (operands exp) var))))
+
+(define (install-deriv-package)
+  (define (deriv-sum operands var)
+    (make-sum (deriv (car operands) var)
+              (deriv (cadr operands) var)))
+  (define (deriv-product operands var)
+    (make-sum
+     (make-product (car operands) (deriv (cadr operands) var))
+     (make-product (deriv (car operands) var) (cadr operands))))
+  (put 'deriv '+ deriv-sum)
+  (put 'deriv '* deriv-product)
+  'done)
+
+(install-deriv-package)

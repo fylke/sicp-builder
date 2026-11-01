@@ -1,0 +1,14 @@
+- 1.01: interpreter transcript, nothing to define
+- 1.05: observation of applicative vs. normal order, no checkable result
+- 1.06: explanation (new-if never terminates), nothing checkable
+- 1.09: substitution-model trace of given procedures, no procedure to write
+- 1.13: mathematical proof
+- 1.14: process tree drawing and order-of-growth analysis
+- 1.15: explanation and order-of-growth analysis of given code
+- 1.20: substitution-model evaluation trace and counting by hand
+- 1.22: timing (runtime) measurements and printed output
+- 1.23: timing comparison, not deterministic
+- 1.24: timing comparison, not deterministic
+- 1.25: explanation, comparison of two expmod versions
+- 1.26: explanation of why a program is slow
+- 1.34: explanation of an error, nothing to define

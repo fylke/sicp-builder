@@ -1,0 +1,72 @@
+- 4.01: Requires rewriting or extending the metacircular evaluator.
+- 4.02: Requires rewriting or extending the metacircular evaluator.
+- 4.03: Requires rewriting or extending the metacircular evaluator.
+- 4.05: Requires changing the evaluator’s cond handling.
+- 4.09: Open-ended design of iteration syntax has no single testable interface.
+- 4.10: Open-ended redesign of evaluator syntax has no fixed expected interface.
+- 4.11: Depends on the evaluator’s environment representation and operations.
+- 4.12: Depends on the evaluator’s environment representation and operations.
+- 4.13: Requires changes to evaluator procedure/environment semantics.
+- 4.14: Requires changes to evaluator procedure/environment semantics.
+- 4.15: Requires changes to evaluator procedure/environment semantics.
+- 4.16: Requires changes to evaluator procedure/environment semantics.
+- 4.17: Primarily asks for semantic analysis of evaluator behavior.
+- 4.18: Primarily asks for semantic analysis of evaluator behavior.
+- 4.19: Primarily asks for semantic analysis of evaluator behavior.
+- 4.20: Requires integrating letrec expansion with evaluator let and assignment support.
+- 4.21: Requires constructing recursive programs rather than a fixed standalone procedure.
+- 4.22: Requires extending or analyzing the evaluator in this section.
+- 4.23: Requires extending or analyzing the evaluator in this section.
+- 4.24: Requires extending or analyzing the evaluator in this section.
+- 4.25: Requires extending or analyzing the evaluator in this section.
+- 4.26: Requires extending or analyzing the evaluator in this section.
+- 4.27: Requires extending or analyzing the evaluator in this section.
+- 4.28: Requires extending or analyzing the evaluator in this section.
+- 4.29: Requires extending or analyzing the evaluator in this section.
+- 4.30: Requires extending or analyzing the evaluator in this section.
+- 4.31: Requires extending or analyzing the evaluator in this section.
+- 4.32: Requires extending or analyzing the evaluator in this section.
+- 4.33: Requires extending or analyzing the evaluator in this section.
+- 4.34: Requires extending or analyzing the evaluator in this section.
+- 4.35: Requires the amb evaluator; the exercise’s nondeterministic interface is not standalone.
+- 4.36: Requires the amb evaluator; the exercise’s nondeterministic interface is not standalone.
+- 4.37: Requires the amb evaluator; the exercise’s nondeterministic interface is not standalone.
+- 4.38: Requires the amb evaluator; the exercise’s nondeterministic interface is not standalone.
+- 4.39: Requires the amb evaluator; the exercise’s nondeterministic interface is not standalone.
+- 4.40: Requires the amb evaluator; the exercise’s nondeterministic interface is not standalone.
+- 4.43: The puzzle details are absent from this exercise’s Markdown source.
+- 4.45: Depends on the amb evaluator and its parsing program.
+- 4.46: Depends on the amb evaluator and its parsing program.
+- 4.47: Depends on the amb evaluator and its parsing program.
+- 4.48: Open-ended grammar design has no single expected solution.
+- 4.49: Requires modifying or analyzing the amb evaluator.
+- 4.50: Requires modifying or analyzing the amb evaluator.
+- 4.51: Requires modifying or analyzing the amb evaluator.
+- 4.52: Requires modifying or analyzing the amb evaluator.
+- 4.53: Requires modifying or analyzing the amb evaluator.
+- 4.54: Requires modifying or analyzing the amb evaluator.
+- 4.55: Requires the query evaluator and its database.
+- 4.56: Requires the query evaluator and its database.
+- 4.57: Requires the query evaluator and its database.
+- 4.58: Requires the query evaluator and its database.
+- 4.59: Requires the query evaluator and its database.
+- 4.60: Requires the query evaluator and its database.
+- 4.61: Requires the query evaluator and its database.
+- 4.62: Requires the query evaluator and its database.
+- 4.63: Requires the query evaluator and its database.
+- 4.64: Requires the query evaluator and its database.
+- 4.65: Requires the query evaluator and its database.
+- 4.66: Requires the query evaluator and its database.
+- 4.67: Requires the query evaluator and its database.
+- 4.68: Requires the query evaluator and its database.
+- 4.69: Requires the query evaluator and its database.
+- 4.70: Requires the query evaluator and its database.
+- 4.71: Requires the query evaluator and its database.
+- 4.72: Requires the query evaluator and its database.
+- 4.73: Requires the query evaluator and its database.
+- 4.74: Requires the query evaluator and its database.
+- 4.75: Requires the query evaluator and its database.
+- 4.76: Requires the query evaluator and its database.
+- 4.77: Requires the query evaluator and its database.
+- 4.78: Requires the query evaluator and its database.
+- 4.79: Requires the query evaluator and its database.

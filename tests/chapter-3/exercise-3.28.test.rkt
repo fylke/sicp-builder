@@ -1,0 +1,91 @@
+#lang sicp
+(#%require rackunit "../lib.rkt")
+
+;; Your exercises/chapter-3/exercise-3.28.rkt must
+;;   (#%provide make-wire get-signal set-signal! propagate or-gate)
+;; The digital-circuit simulator of section 3.3.4 is NOT part of the exercise: copy the
+;; book's code (wires, agenda, inverter, and-gate, ...) into your file and add your or-gate.
+;;   (make-wire)                 -> a new wire, signal 0
+;;   (get-signal wire)           -> the wire's current signal (0 or 1)
+;;   (set-signal! wire v)        -> sets the signal (action procedures are triggered)
+;;   (propagate)                 -> runs the agenda until it is empty
+;;   (or-gate a1 a2 output)      -> primitive or-gate function box
+
+(define (check-or or-gate make-wire get-signal set-signal! propagate a b)
+  (define w1 (make-wire))
+  (define w2 (make-wire))
+  (define out (make-wire))
+  (or-gate w1 w2 out)
+  (set-signal! w1 a)
+  (set-signal! w2 b)
+  (propagate)
+  (check-equal? (get-signal out) (if (or (= a 1) (= b 1)) 1 0)))
+
+(test-case "or-gate truth table"
+  (define make-wire (solution "3.28" 'make-wire))
+  (define get-signal (solution "3.28" 'get-signal))
+  (define set-signal! (solution "3.28" 'set-signal!))
+  (define propagate (solution "3.28" 'propagate))
+  (define or-gate (solution "3.28" 'or-gate))
+  (check-or or-gate make-wire get-signal set-signal! propagate 0 0)
+  (check-or or-gate make-wire get-signal set-signal! propagate 0 1)
+  (check-or or-gate make-wire get-signal set-signal! propagate 1 0)
+  (check-or or-gate make-wire get-signal set-signal! propagate 1 1))
+
+(test-case "output stays 0 until an input changes"
+  (define make-wire (solution "3.28" 'make-wire))
+  (define get-signal (solution "3.28" 'get-signal))
+  (define propagate (solution "3.28" 'propagate))
+  (define or-gate (solution "3.28" 'or-gate))
+  (define a (make-wire))
+  (define b (make-wire))
+  (define out (make-wire))
+  (or-gate a b out)
+  (propagate)
+  (check-equal? (get-signal out) 0))
+
+(test-case "output follows a sequence of input changes"
+  (define make-wire (solution "3.28" 'make-wire))
+  (define get-signal (solution "3.28" 'get-signal))
+  (define set-signal! (solution "3.28" 'set-signal!))
+  (define propagate (solution "3.28" 'propagate))
+  (define or-gate (solution "3.28" 'or-gate))
+  (define a (make-wire))
+  (define b (make-wire))
+  (define out (make-wire))
+  (or-gate a b out)
+  (set-signal! a 1)
+  (propagate)
+  (check-equal? (get-signal out) 1)
+  (set-signal! b 1)
+  (propagate)
+  (check-equal? (get-signal out) 1)
+  (set-signal! a 0)
+  (propagate)
+  (check-equal? (get-signal out) 1)
+  (set-signal! b 0)
+  (propagate)
+  (check-equal? (get-signal out) 0))
+
+(test-case "or-gates can be chained"
+  (define make-wire (solution "3.28" 'make-wire))
+  (define get-signal (solution "3.28" 'get-signal))
+  (define set-signal! (solution "3.28" 'set-signal!))
+  (define propagate (solution "3.28" 'propagate))
+  (define or-gate (solution "3.28" 'or-gate))
+  (define a (make-wire))
+  (define b (make-wire))
+  (define c (make-wire))
+  (define ab (make-wire))
+  (define out (make-wire))
+  (or-gate a b ab)
+  (or-gate ab c out)
+  (set-signal! c 1)
+  (propagate)
+  (check-equal? (get-signal out) 1)
+  (set-signal! c 0)
+  (propagate)
+  (check-equal? (get-signal out) 0)
+  (set-signal! b 1)
+  (propagate)
+  (check-equal? (get-signal out) 1))

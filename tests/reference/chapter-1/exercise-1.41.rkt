@@ -1,0 +1,5 @@
+#lang sicp
+(#%provide double)
+
+(define (double f)
+  (lambda (x) (f (f x))))

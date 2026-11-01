@@ -66,6 +66,41 @@ docker build --target exercises --output type=local,dest=exercises .
 ```
  The dev container is separate from the EPUB build and does not affect it.
 
+### Checking your answers
+
+Tests live in [tests/](tests), one file per testable exercise
+(`tests/chapter-1/exercise-1.03.test.rkt`). The top of each test file lists the names your
+solution must provide, for example:
+
+```racket
+#lang sicp
+(#%provide sum-of-squares-of-two-largest)
+(define (square x) (* x x))
+(define (sum-of-squares-of-two-largest a b c) ...)
+```
+
+Save that as `exercises/chapter-1/exercise-1.03.rkt`, then run, inside the dev container:
+
+```sh
+raco test tests/chapter-1/exercise-1.03.test.rkt   # one exercise
+raco test tests/chapter-1                          # one chapter
+raco test tests                                    # everything
+```
+
+Until you write a solution its tests fail with "no solution yet", so `raco test tests`
+shows what is left. Exercises that can't be checked automatically (explanations, traces,
+timing, or changes to the book's big evaluator and machine simulator) have no test; each
+chapter's `SKIPPED.md` (e.g. [tests/chapter-1/SKIPPED.md](tests/chapter-1/SKIPPED.md))
+lists them and says why.
+
+The tests are checked against reference solutions in `tests/reference/`. Don't read
+those if you want to work the exercises yourself. To run the suite against them:
+
+```sh
+SICP_SOLUTIONS=$PWD/tests/reference raco test tests
+```
+
+
 ## CI
 
 [.github/workflows/build.yml](.github/workflows/build.yml) builds and validates the EPUB

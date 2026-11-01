@@ -1,0 +1,60 @@
+#lang sicp
+(#%provide deriv deriv-b)
+
+(define (variable? x) (symbol? x))
+(define (same-variable? v1 v2)
+  (and (variable? v1) (variable? v2) (eq? v1 v2)))
+(define (=number? exp num) (and (number? exp) (= exp num)))
+
+;; shared constructors (the list representation is infix in both parts)
+(define (make-sum a1 a2)
+  (cond ((=number? a1 0) a2)
+        ((=number? a2 0) a1)
+        ((and (number? a1) (number? a2)) (+ a1 a2))
+        (else (list a1 '+ a2))))
+(define (make-product m1 m2)
+  (cond ((or (=number? m1 0) (=number? m2 0)) 0)
+        ((=number? m1 1) m2)
+        ((=number? m2 1) m1)
+        ((and (number? m1) (number? m2)) (* m1 m2))
+        (else (list m1 '* m2))))
+
+;; (a) fully parenthesized
+(define (sum-a? x) (and (pair? x) (eq? (cadr x) '+)))
+(define (product-a? x) (and (pair? x) (eq? (cadr x) '*)))
+
+(define (deriv exp var)
+  (cond ((number? exp) 0)
+        ((variable? exp) (if (same-variable? exp var) 1 0))
+        ((sum-a? exp)
+         (make-sum (deriv (car exp) var) (deriv (caddr exp) var)))
+        ((product-a? exp)
+         (make-sum
+          (make-product (car exp) (deriv (caddr exp) var))
+          (make-product (deriv (car exp) var) (caddr exp))))
+        (else (error "unknown expression type -- DERIV" exp))))
+
+;; (b) standard notation: + is looked for first, then *
+(define (before op items)
+  (if (eq? (car items) op)
+      '()
+      (cons (car items) (before op (cdr items)))))
+(define (after op items) (cdr (memq op items)))
+(define (unwrap items) (if (null? (cdr items)) (car items) items))
+
+(define (sum-b? x) (and (pair? x) (memq '+ x) #t))
+(define (product-b? x) (and (pair? x) (not (memq '+ x)) (memq '* x) #t))
+
+(define (deriv-b exp var)
+  (cond ((number? exp) 0)
+        ((variable? exp) (if (same-variable? exp var) 1 0))
+        ((null? (cdr exp)) (deriv-b (car exp) var))
+        ((sum-b? exp)
+         (make-sum (deriv-b (unwrap (before '+ exp)) var)
+                   (deriv-b (unwrap (after '+ exp)) var)))
+        ((product-b? exp)
+         (let ((m1 (unwrap (before '* exp)))
+               (m2 (unwrap (after '* exp))))
+           (make-sum (make-product m1 (deriv-b m2 var))
+                     (make-product (deriv-b m1 var) m2))))
+        (else (error "unknown expression type -- DERIV" exp))))

@@ -1,0 +1,32 @@
+- 3.09: environment diagrams for recursive/iterative factorial
+- 3.10: environment diagrams and explanation of let
+- 3.11: environment diagrams for the message-passing account
+- 3.12: asks for box-and-pointer diagrams and printed responses
+- 3.15: asks for box-and-pointer diagrams of shared structure
+- 3.20: environment diagrams for the pair-as-procedure implementation
+- 3.21: explanation of printed queue representation (relies on the book's queue code)
+- 3.26: describes a table design (no fixed interface)
+- 3.27: explanation and environment diagram of memoization
+- 3.31: explanation of why the wire action is run on being added
+- 3.32: explanation of the agenda ordering (FIFO)
+- 3.34: explains why the squarer constraint is flawed
+- 3.36: environment diagram
+- 3.38: lists possible values and timing diagrams
+- 3.39: concurrency (serializers/parallel-execute not available), asks which results remain possible
+- 3.40: concurrency (serializers/parallel-execute not available), asks which results are possible
+- 3.41: concurrency; asks for an opinion on a design
+- 3.42: concurrency; asks whether a change is safe
+- 3.43: concurrency; explanation with timing diagrams
+- 3.44: concurrency; explanation of transfer vs exchange
+- 3.45: concurrency; explanation of what goes wrong
+- 3.46: concurrency; timing diagram of test-and-set!
+- 3.47: semaphores need mutexes/concurrency primitives that are not available
+- 3.48: needs serializers and concurrency primitives, plus an explanation
+- 3.49: concurrency; asks for a scenario
+- 3.51: printing side effects of stream-ref/show
+- 3.52: printing and memoization explanation
+- 3.53: asks to describe a stream
+- 3.57: counts additions/explanation of memoization
+- 3.63: explanation of efficiency difference
+- 3.66: analysis of the order of pairs
+- 3.68: explanation of why a variant of pairs loops

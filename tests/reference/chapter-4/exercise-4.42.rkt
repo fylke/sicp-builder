@@ -1,0 +1,43 @@
+#lang sicp
+(#%provide liars-puzzle)
+
+(define (flat-map procedure values)
+  (if (null? values)
+      '()
+      (append (procedure (car values))
+              (flat-map procedure (cdr values)))))
+
+(define (remove-first item values)
+  (cond ((null? values) '())
+        ((= item (car values)) (cdr values))
+        (else (cons (car values) (remove-first item (cdr values))))))
+
+(define (permutations values)
+  (if (null? values)
+      (list '())
+      (flat-map
+       (lambda (item)
+         (map (lambda (rest) (cons item rest))
+              (permutations (remove-first item values))))
+       values)))
+
+(define (exactly-one? first second)
+  (not (eq? first second)))
+
+(define (liars-puzzle)
+  (define (valid? ranks)
+    (let ((betty (car ranks))
+          (ethel (cadr ranks))
+          (joan (caddr ranks))
+          (kitty (cadddr ranks))
+          (mary (car (cddddr ranks))))
+      (and (exactly-one? (= kitty 2) (= betty 3))
+           (exactly-one? (= ethel 1) (= joan 2))
+           (exactly-one? (= joan 3) (= ethel 5))
+           (exactly-one? (= kitty 2) (= mary 4))
+           (exactly-one? (= mary 4) (= betty 1)))))
+  (define (find-answer candidates)
+    (cond ((null? candidates) (error "No Liars puzzle solution"))
+          ((valid? (car candidates)) (car candidates))
+          (else (find-answer (cdr candidates)))))
+  (find-answer (permutations '(1 2 3 4 5))))

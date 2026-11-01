@@ -13,6 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # The tests must pass against the reference solutions.
+      - name: Test the exercise tests
+        run: |
+          docker build -t sicp-dev .devcontainer
+          docker run --rm -v "$PWD":/w -e SICP_SOLUTIONS=/w/tests/reference sicp-dev raco test /w/tests
       # The epub stage runs EPUBCheck, so a successful build means a valid EPUB.
       - name: Build and validate EPUB
         run: docker build --target epub --output type=local,dest=out .

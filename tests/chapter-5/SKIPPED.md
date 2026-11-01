@@ -1,0 +1,52 @@
+- 5.01: design/diagrams only
+- 5.02: needs book's machine simulator
+- 5.03: needs book's machine simulator
+- 5.04: needs book's machine simulator
+- 5.05: hand simulation, no code
+- 5.06: explanation of machine, no code
+- 5.07: needs book's machine simulator
+- 5.08: explanation about simulator behaviour
+- 5.09: modifies book's simulator
+- 5.10: design of new syntax for simulator
+- 5.11: modifies/uses book's simulator
+- 5.12: extends book's assembler
+- 5.13: modifies book's simulator
+- 5.14: measurement with simulator, formulas
+- 5.15: extends book's simulator
+- 5.16: extends book's simulator (tracing)
+- 5.17: extends book's simulator (tracing)
+- 5.18: extends book's simulator (tracing)
+- 5.19: extends book's simulator (breakpoints)
+- 5.20: box-and-pointer diagram drawing
+- 5.21: needs book's simulator for register machines
+- 5.22: needs book's simulator for register machines
+- 5.23: extends explicit-control evaluator
+- 5.24: extends explicit-control evaluator
+- 5.25: extends explicit-control evaluator
+- 5.26: measurement with evaluator/stack stats
+- 5.27: measurement with evaluator/stack stats
+- 5.28: measurement with evaluator/stack stats
+- 5.29: measurement with evaluator/stack stats
+- 5.30: measurement/explanation, no code
+- 5.31: explanation of compiled code, no code
+- 5.32: extends explicit-control evaluator
+- 5.33: needs book's compiler; compares output
+- 5.34: needs book's compiler; inspect output
+- 5.35: inspect compiler output by hand
+- 5.36: explanation, no code
+- 5.37: explanation/modifies book's compiler
+- 5.38: extends book's compiler
+- 5.39: modifies book's compiler (lexical addressing)
+- 5.40: modifies book's compiler
+- 5.41: needs book's compiler data structures
+- 5.42: modifies book's compiler
+- 5.43: modifies book's compiler
+- 5.44: modifies book's compiler
+- 5.45: measurement/analysis with compiler
+- 5.46: measurement/analysis with compiler
+- 5.47: extends book's compiler
+- 5.48: extends book's compiler/evaluator
+- 5.49: needs book's simulator and evaluator
+- 5.50: needs book's compiler and simulator
+- 5.51: requires translating evaluator to another language
+- 5.52: requires translating compiler to another language

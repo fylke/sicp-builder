@@ -1,0 +1,11 @@
+#lang racket/base
+(require racket/runtime-path)
+(provide solution)
+(define-runtime-path default-dir "../exercises")
+(define (solution id name)
+  (define chapter (car (regexp-match #rx"^[0-9]+" id)))
+  (define dir (or (getenv "SICP_SOLUTIONS") (path->string default-dir)))
+  (define file (build-path dir (string-append "chapter-" chapter) (string-append "exercise-" id ".rkt")))
+  (unless (file-exists? file)
+    (error 'solution "no solution yet: write ~a" file))
+  (dynamic-require file name (lambda () (error 'solution "~a does not provide `~a`" file name))))
