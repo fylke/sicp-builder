@@ -1,0 +1,18 @@
+Exercise 3.79: Generalize the ‘solve-2nd’ procedure of
+Exercise 3.78 so that it can be used to solve general
+second-order differential equations {d^2 y / dt^2} = {f(dy / dt,
+y)}.
+
+*Figure 3.36:* A series RLC circuit.
+
+                   + v_R -
+             i_R
+          +--->----'\/\/\,--------+
+          |                       |  i_L
+         \|/          R          \|/
+       +  |  i_C                  |_   +
+         -+-                       _)
+     v_C -+- C                     _)  v_L
+          |                        _)
+       -  |                       |    -
+          +-----------------------+

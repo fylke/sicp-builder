@@ -54,8 +54,17 @@ devcontainer-compatible tool). [.devcontainer/](.devcontainer) provides:
 - MIT Scheme (`mit-scheme`), the dialect the book was written for.
 - The Magic Racket VS Code extension.
 
-Put your solutions in [exercises/](exercises); `racket exercises/example.rkt` runs the
-sample. The dev container is separate from the EPUB build and does not affect it.
+The 356 exercise statements are in [exercises/](exercises), one text file per exercise
+in chapter directories (`exercises/chapter-1/exercise-1.09.txt`). Write your solution
+next to the statement, for example `exercise-1.09.rkt`. `racket exercises/example.rkt`
+runs a sample. The text is the book's, under
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), extracted from the Texinfo
+source. To regenerate it:
+
+```sh
+docker build --target exercises --output type=local,dest=exercises .
+```
+ The dev container is separate from the EPUB build and does not affect it.
 
 ## CI
 

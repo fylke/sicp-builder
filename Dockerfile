@@ -77,6 +77,16 @@ RUN make -B all \
     && ! grep -lE "color:blue|class='faulty'" html/*.xhtml \
     && test -s /sicp.epub
 
+# Exercise statements as plain text, one file per exercise. Export with:
+#   docker build --target exercises --output type=local,dest=exercises .
+FROM build AS exercises-text
+COPY scripts/extract-exercises.rb /extract-exercises.rb
+RUN ./texi2any --plaintext --no-split --no-warn -o /book.txt sicp-pocket.texi \
+    && ruby /extract-exercises.rb /book.txt /exercises
+
+FROM scratch AS exercises
+COPY --from=exercises-text /exercises /
+
 FROM docker.io/library/eclipse-temurin:21-jre-alpine-3.24 AS validate
 
 ARG EPUBCHECK_VERSION=5.4.0

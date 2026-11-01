@@ -1,0 +1,17 @@
+Exercise 4.6: ‘Let’ expressions are derived expressions, because
+
+     (let ((⟨VAR₁⟩ ⟨EXP₁⟩) … (⟨VARₙ⟩ ⟨EXPₙ⟩))
+       ⟨BODY⟩)
+
+is equivalent to
+
+     ((lambda (⟨VAR₁⟩ … ⟨VARₙ⟩)
+        ⟨BODY⟩)
+      ⟨EXP₁⟩
+      …
+      ⟨EXPₙ⟩)
+
+Implement a syntactic transformation ‘let->combination’ that
+reduces evaluating ‘let’ expressions to evaluating combinations of
+the type shown above, and add the appropriate clause to ‘eval’ to
+handle ‘let’ expressions.
