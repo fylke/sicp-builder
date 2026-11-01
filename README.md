@@ -15,6 +15,14 @@ The build regenerates all HTML (`make -B all`) and fails if any LaTeX could not 
 converted. MathML attributes differ cosmetically from the committed upstream HTML
 (MathJax 3 emits `data-mjx-texclass` where MathJax 2 emitted `class="MJX-TeXAtom-*"`).
 
+The cover thumbnail is rendered with Inkscape 1.x. The Dockerfile rewrites the
+upstream `Makefile`'s removed `-e`/`-f` flags with a checked `sed`, and installs the
+fonts the cover SVG uses: Linux Libertine/Biolinum from Alpine and a pinned,
+checksummed Alegreya.
+
+Base images (Alpine 3.24) and downloads (Texinfo, Alegreya, EPUBCheck) are pinned, and
+downloads are verified by SHA-256.
+
 Build the EPUB and write it to the current directory:
 
 ```sh
@@ -23,9 +31,9 @@ docker build --target epub --output type=local,dest=. .
 
 This creates `sicp.epub`. The EPUB is validated with
 [EPUBCheck](https://github.com/w3c/epubcheck) (pinned version and checksum, warnings
-treated as failures) and by [check-epub.sh](check-epub.sh) (chapter count, MathML, highlighted code,
-cover size, no missing figures) before it is exported, so a build that produces an invalid EPUB
-fails instead of writing the file. The final image stage contains only the EPUB; the
+treated as failures) and by [check-epub.sh](check-epub.sh) (chapter count, MathML,
+highlighted code, cover size, no missing figures) before it is exported, so a build
+that produces an invalid EPUB fails instead of writing the file. The final image stage contains only the EPUB; the
 toolchain lives in the intermediate `build` stage. To build a different upstream
 revision, add `--build-arg SICP_REF=<commit>`.
 
@@ -35,3 +43,10 @@ To inspect the build environment, build and run the `build` stage:
 docker build --target build -t sicp-builder .
 docker run --rm -it sicp-builder bash
 ```
+## CI
+
+[.github/workflows/build.yml](.github/workflows/build.yml) builds and validates the EPUB
+on pushes to `main`, pull requests, weekly and on manual dispatch, and uploads it as the
+`sicp-epub` artifact.
+
+Remaining ideas are tracked in [PLAN.md](PLAN.md).
