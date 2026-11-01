@@ -1,0 +1,14 @@
+{
+  "name": "SICP exercises",
+  "build": { "dockerfile": "Dockerfile" },
+  "remoteUser": "vscode",
+  "customizations": {
+    "vscode": {
+      "extensions": ["evzen-wybitul.magic-racket"],
+      "settings": {
+        "files.associations": { "*.scm": "scheme", "*.rkt": "racket" },
+        "magicRacket.general.racketPath": "/usr/bin/racket"
+      }
+    }
+  }
+}

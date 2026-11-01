@@ -43,6 +43,20 @@ To inspect the build environment, build and run the `build` stage:
 docker build --target build -t sicp-builder .
 docker run --rm -it sicp-builder bash
 ```
+## Dev container for the exercises
+
+Open the repository in VS Code and choose "Reopen in Container" (or use any
+devcontainer-compatible tool). [.devcontainer/](.devcontainer) provides:
+
+- Racket with the `sicp` language: start a file with `#lang sicp` to get `cons-stream`,
+  `inc`/`dec`, `nil`, `amb` and the rest of what the book assumes. The picture language
+  (section 2.2.4) is `(require sicp-pict)`.
+- MIT Scheme (`mit-scheme`), the dialect the book was written for.
+- The Magic Racket VS Code extension.
+
+Put your solutions in [exercises/](exercises); `racket exercises/example.rkt` runs the
+sample. The dev container is separate from the EPUB build and does not affect it.
+
 ## CI
 
 [.github/workflows/build.yml](.github/workflows/build.yml) builds and validates the EPUB
