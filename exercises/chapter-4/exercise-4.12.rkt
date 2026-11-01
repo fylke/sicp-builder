@@ -1,0 +1,12 @@
+#lang sicp
+;; Exercise 4.12
+;;
+;; The procedures
+;; `define-variable!`, `set-variable-value!` and
+;; `lookup-variable-value` can be expressed in terms of more abstract
+;; procedures for traversing the environment structure.  Define abstractions that
+;; capture the common patterns and redefine the three procedures in terms of these
+;; abstractions.
+
+;; No automatic test for this exercise.
+

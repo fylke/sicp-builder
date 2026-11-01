@@ -1,7 +1,10 @@
 #!/usr/bin/env ruby
-# Converts the exercises in the Texinfo source of the book to Markdown, one file per
-# exercise: <outdir>/chapter-N/exercise-N.MM.md.
-# Usage: extract-exercises.rb sicp-pocket.texi outdir
+# Converts the exercises in the Texinfo source of the book to Racket source files, one per
+# exercise: <outdir>/chapter-N/exercise-N.MM.rkt. The statement is a Markdown comment at
+# the top, followed by room for the solution.
+# Usage: extract-exercises.rb sicp-pocket.texi outdir [testsdir]
+# With testsdir, the header comment of the exercise's test (the names the solution must
+# provide) is copied into the file.
 #
 # Only the Texinfo constructs that occur in the exercises are supported; anything else
 # aborts the run instead of silently producing wrong output.
@@ -342,7 +345,7 @@ class Converter
       if node =~ /\AExercise (\d+)\.(\d+)\z/
         chapter = Regexp.last_match(1)
         "[#{label}](../chapter-#{chapter}/exercise-" \
-          "#{chapter}.#{format('%02d', Regexp.last_match(2).to_i)}.md)"
+          "#{chapter}.#{format('%02d', Regexp.last_match(2).to_i)}.rkt)"
       else
         typography(label)
       end
@@ -352,8 +355,8 @@ class Converter
   end
 end
 
-texi, outdir = ARGV
-abort "usage: #{$PROGRAM_NAME} sicp-pocket.texi outdir" unless texi && outdir
+texi, outdir, testsdir = ARGV
+abort "usage: #{$PROGRAM_NAME} sicp-pocket.texi outdir [testsdir]" unless texi && outdir
 
 src = File.readlines(texi, chomp: true)
 count = 0
@@ -410,8 +413,26 @@ src.each_index do |s|
   seen[id] = true
   dir = File.join(outdir, "chapter-#{chapter}")
   FileUtils.mkdir_p(dir)
-  File.write(File.join(dir, format('exercise-%s.%02d.md', chapter, number.to_i)),
-             "# Exercise #{id}\n\n#{md.join("\n").strip}\n")
+  name = format('exercise-%s.%02d', chapter, number.to_i)
+  test = testsdir && File.join(testsdir, "chapter-#{chapter}", "#{name}.test.rkt")
+  hint = []
+  if test && File.exist?(test)
+    # The first block of comment lines in the test says what the solution must provide.
+    hint = File.readlines(test, chomp: true).drop(2).drop_while { |l| !l.start_with?(';;') }
+               .take_while { |l| l.start_with?(';;') }
+  end
+
+  comment = md.join("\n").strip.lines.map { |l| l.strip.empty? ? ';;' : ";; #{l.rstrip}" }
+  # The heading is "Exercise N.M" in Markdown; in the source file it is the first line.
+  out = ['#lang sicp', ";; Exercise #{id}", ';;', *comment, '']
+  if hint.empty?
+    out << ';; No automatic test for this exercise.'
+  else
+    out << ";; Test: raco test tests/chapter-#{chapter}/#{name}.test.rkt"
+    out.concat(hint)
+  end
+  out << '' << ''
+  File.write(File.join(dir, "#{name}.rkt"), out.join("\n"))
   count += 1
 end
 

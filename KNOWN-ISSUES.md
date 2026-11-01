@@ -44,14 +44,15 @@ Things that are unverified, limited or likely to break. Not a to-do list; see
 - Racket 8.16 and the `sicp` package are not pinned beyond what the Debian trixie image
   provides.
 
-## Exercises (Markdown)
+## Exercises (Racket files with the statement as a comment)
 
 - **Figures.** Only the ASCII art is kept (e.g. 2.42 and 3.73). Figures that are
   images, including Figure 3.37 for 3.80, are not included. A figure is appended to an
   exercise only when it sits in its own quotation right before the figure's anchor.
 - **References.** `@ref` to anything other than an exercise becomes plain text, so
   "Figure 2.8" and section references are not links.
-- **Math** is converted to `$…$` and `$$…$$` and has not been checked in a renderer.
+- **Math** is converted to `$…$` and `$$…$$` and sits in comments, so it is raw TeX in
+  the editor.
   Plain-TeX constructs (`\matrix`, `\cr`, `\kern`, `\hline`) remain in 2.37 and 5.27 and
   may not render in KaTeX or MathJax. `eqnarray` blocks are rewritten to `aligned`.
 - **Typography.** Quotes and dashes in prose are converted to Unicode and Markdown
@@ -89,3 +90,7 @@ Things that are unverified, limited or likely to break. Not a to-do list; see
 - **Book code you must supply.** The 2.67–2.70 tests need your file to define the book's
   Huffman tree code, and 3.80 assumes the book's `(RLC R L C dt)` interface.
 - **CI** now runs the suite against the references; this has not run on GitHub yet.
+- **Regenerating exercises overwrites solutions** if written into `exercises/`; the README
+  uses a scratch directory and `cp -n`.
+- **Test headers are copied into the exercise files** when generated, so they go stale if
+  a test's header changes later.

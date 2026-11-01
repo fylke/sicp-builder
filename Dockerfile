@@ -77,11 +77,12 @@ RUN make -B all \
     && ! grep -lE "color:blue|class='faulty'" html/*.xhtml \
     && test -s /sicp.epub
 
-# Exercise statements as Markdown, one file per exercise. Export with:
+# Exercise stubs: the statement as a comment in a Racket file, one per exercise. Export with:
 #   docker build --target exercises --output type=local,dest=exercises .
 FROM build AS exercises-text
 COPY scripts/extract-exercises.rb /extract-exercises.rb
-RUN ruby /extract-exercises.rb sicp-pocket.texi /exercises
+COPY tests /tests
+RUN ruby /extract-exercises.rb sicp-pocket.texi /exercises /tests
 
 FROM scratch AS exercises
 COPY --from=exercises-text /exercises /

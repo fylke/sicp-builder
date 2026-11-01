@@ -54,23 +54,27 @@ devcontainer-compatible tool). [.devcontainer/](.devcontainer) provides:
 - MIT Scheme (`mit-scheme`), the dialect the book was written for.
 - The Magic Racket VS Code extension.
 
-The 356 exercise statements are in [exercises/](exercises), one Markdown file per exercise
-in chapter directories (`exercises/chapter-1/exercise-1.09.md`). Write your solution
-next to the statement, for example `exercise-1.09.rkt`. `racket exercises/example.rkt`
-runs a sample. The text is the book's, under
+Each of the 356 exercises is a Racket file in [exercises/](exercises), for example
+`exercises/chapter-1/exercise-1.09.rkt`. The problem statement is a comment at the top
+(Markdown, readable as is), followed by the test command and the names the test expects.
+Write your solution below it in the same file, starting with the
+`(#%provide ...)` line the header asks for. `racket exercises/example.rkt` runs a sample.
+The text is the book's, under
 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), extracted from the Texinfo
-source. To regenerate it:
+source. Regenerating the files would overwrite your solutions, so write them to a scratch
+directory and copy over only the missing ones:
 
 ```sh
-docker build --target exercises --output type=local,dest=exercises .
+docker build --target exercises --output type=local,dest=/tmp/exercises .
+cp -rn /tmp/exercises/. exercises/
 ```
  The dev container is separate from the EPUB build and does not affect it.
 
 ### Checking your answers
 
 Tests live in [tests/](tests), one file per testable exercise
-(`tests/chapter-1/exercise-1.03.test.rkt`). The top of each test file lists the names your
-solution must provide, for example:
+(`tests/chapter-1/exercise-1.03.test.rkt`). The header of each exercise file (copied from
+its test) lists the names your solution must provide, for example:
 
 ```racket
 #lang sicp
@@ -79,7 +83,8 @@ solution must provide, for example:
 (define (sum-of-squares-of-two-largest a b c) ...)
 ```
 
-Save that as `exercises/chapter-1/exercise-1.03.rkt`, then run, inside the dev container:
+Put that in `exercises/chapter-1/exercise-1.03.rkt`, below the statement, then run, inside
+the dev container:
 
 ```sh
 raco test tests/chapter-1/exercise-1.03.test.rkt   # one exercise
@@ -87,7 +92,7 @@ raco test tests/chapter-1                          # one chapter
 raco test tests                                    # everything
 ```
 
-Until you write a solution its tests fail with "no solution yet", so `raco test tests`
+Until you write a solution its tests fail ("does not provide ..."), so `raco test tests`
 shows what is left. Exercises that can't be checked automatically (explanations, traces,
 timing, or changes to the book's big evaluator and machine simulator) have no test; each
 chapter's `SKIPPED.md` (e.g. [tests/chapter-1/SKIPPED.md](tests/chapter-1/SKIPPED.md))

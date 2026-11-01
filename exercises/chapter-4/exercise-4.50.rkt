@@ -1,0 +1,10 @@
+#lang sicp
+;; Exercise 4.50
+;;
+;; Implement a new special form
+;; `ramb` that is like `amb` except that it searches alternatives in a
+;; random order, rather than from left to right.  Show how this can help with
+;; Alyssa’s problem in [Exercise 4.49](../chapter-4/exercise-4.49.rkt).
+
+;; No automatic test for this exercise.
+
