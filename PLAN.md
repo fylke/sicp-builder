@@ -10,9 +10,7 @@ multi-stage build gated by EPUBCheck, proper cover fonts, Texinfo 6.0 via
 2. ~~Pin the validate stage~~ Done: `eclipse-temurin:21-jre-alpine-3.24`.
 3. ~~Tidy the Dockerfile~~ Partly done: `gcompat` dropped. The `ruby` symlink
    stays (the upstream scripts use `#!/usr/bin/ruby`).
-4. **Stronger EPUB checks.** EPUBCheck only validates structure. Add content checks
-   (expected chapter count, MathML present, cover image non-trivial, no missing
-   fonts in the cover render).
+4. ~~Stronger EPUB checks~~ Done: `check-epub.sh` runs in the validate stage.
 5. **Texinfo 7 (large, optional).** The patch no longer applies cleanly to 6.1+, and
    7.x rewrote the converter (703 `.html` files instead of 42 `.xhtml`, and it
    drops `@setshortcontentsaftertitlepage`). It needs a full port of upstream's

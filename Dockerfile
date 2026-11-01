@@ -81,9 +81,11 @@ RUN apk add --no-cache unzip wget \
     && unzip -q /tmp/epubcheck.zip -d /opt \
     && rm /tmp/epubcheck.zip
 
+COPY --chmod=755 check-epub.sh /check-epub.sh
 COPY --from=build /sicp.epub /sicp.epub
 # Exits non-zero on any error or warning, which fails the build.
 RUN java -jar /opt/epubcheck-${EPUBCHECK_VERSION}/epubcheck.jar --failonwarnings /sicp.epub
+RUN /check-epub.sh /sicp.epub
 
 FROM scratch AS epub
 # Copying from the validate stage makes validation a prerequisite of the output.

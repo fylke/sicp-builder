@@ -23,7 +23,8 @@ docker build --target epub --output type=local,dest=. .
 
 This creates `sicp.epub`. The EPUB is validated with
 [EPUBCheck](https://github.com/w3c/epubcheck) (pinned version and checksum, warnings
-treated as failures) before it is exported, so a build that produces an invalid EPUB
+treated as failures) and by [check-epub.sh](check-epub.sh) (chapter count, MathML, highlighted code,
+cover size, no missing figures) before it is exported, so a build that produces an invalid EPUB
 fails instead of writing the file. The final image stage contains only the EPUB; the
 toolchain lives in the intermediate `build` stage. To build a different upstream
 revision, add `--build-arg SICP_REF=<commit>`.
