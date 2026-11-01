@@ -54,8 +54,8 @@ devcontainer-compatible tool). [.devcontainer/](.devcontainer) provides:
 - MIT Scheme (`mit-scheme`), the dialect the book was written for.
 - The Magic Racket VS Code extension.
 
-The 356 exercise statements are in [exercises/](exercises), one text file per exercise
-in chapter directories (`exercises/chapter-1/exercise-1.09.txt`). Write your solution
+The 356 exercise statements are in [exercises/](exercises), one Markdown file per exercise
+in chapter directories (`exercises/chapter-1/exercise-1.09.md`). Write your solution
 next to the statement, for example `exercise-1.09.rkt`. `racket exercises/example.rkt`
 runs a sample. The text is the book's, under
 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), extracted from the Texinfo

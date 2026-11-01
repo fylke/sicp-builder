@@ -1,0 +1,7 @@
+# Exercise 3.82
+
+Redo [Exercise 3.5](../chapter-3/exercise-3.05.md) on Monte
+Carlo integration in terms of streams.  The stream version of
+`estimate-integral` will not have an argument telling how many trials to
+perform.  Instead, it will produce a stream of estimates based on successively
+more trials.
