@@ -47,6 +47,8 @@ docker run --rm -it sicp-builder bash
 
 [.github/workflows/build.yml](.github/workflows/build.yml) builds and validates the EPUB
 on pushes to `main`, pull requests, weekly and on manual dispatch, and uploads it as the
-`sicp-epub` artifact.
+`sicp-epub` artifact. Each push to `main` also publishes a
+[release](../../releases) with the EPUB, tagged `vYYYY.MM.DD-<short sha>`; pull requests,
+the weekly run and manual runs only verify the build.
 
 Remaining ideas are tracked in [PLAN.md](PLAN.md).
