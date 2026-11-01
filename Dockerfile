@@ -30,6 +30,14 @@ WORKDIR /sicp
 RUN sed -i "s/-e \$(THUMB) -f \$(DIR)fig/-o \$(THUMB) \$(DIR)fig/" Makefile \
     && grep -q -- "-o \$(THUMB)" Makefile
 
+# The cover page embeds the SVG in an <object> with no intrinsic size, which e-readers
+# collapse to a tiny box. Use the rendered cover.png as a normally sized image instead.
+RUN sed -i 's#<object data="html/fig/coverpage.std.svg" type="image/svg+xml">SVG</object>#<img src="html/fig/cover.png" alt="Structure and Interpretation of Computer Programs" style="display: block; width: 100%; max-width: 100%; height: auto;"/>#' index.in.xhtml \
+    && grep -q 'src="html/fig/cover.png"' index.in.xhtml
+# The cover page no longer contains SVG, so its OPF item must not declare the property.
+RUN sed -i 's#href="index.xhtml" properties="svg" #href="index.xhtml" #' create_metafiles.rb \
+    && ! grep -q 'href="index.xhtml" properties="svg"' create_metafiles.rb
+
 RUN ["ln", "-s", "/usr/local/bin/ruby", "/usr/bin/ruby"]
 
 # Upstream targets Texinfo 5.1 and ships a modified HTML.pm. texinfo-sicp.patch
